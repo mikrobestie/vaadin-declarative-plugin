@@ -1,0 +1,44 @@
+{
+  parserClass = 'cz.mikrobestie.idea.vaadin.declarative.lang.VaadinDesignParser'
+
+  extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
+
+  psiClassPrefix="VD"
+  psiImplClassSuffix="Impl"
+  psiPackage="cz.mikrobestie.idea.vaadin.declarative.psi"
+  psiImplPackage="cz.mikrobestie.idea.vaadin.declarative.psi.impl"
+
+  elementTypeHolderClass="cz.mikrobestie.idea.vaadin.declarative.psi.VDTypes"
+  elementTypeClass="cz.mikrobestie.idea.vaadin.declarative.psi.VDElementType"
+  tokenTypeClass="cz.mikrobestie.idea.vaadin.declarative.psi.VDTokenType"
+
+    tokens = [
+        L_BRACKET='<'
+        R_BRACKET='>'
+        SLASH='/'
+
+        space='regexp:\s+'
+        identifier='regexp:([a-z]-)+'
+    ]
+}
+
+document ::= html_tag | component
+
+// HTML head
+html_tag ::= '<' html '>'
+
+tag ::= '<' void_tag_name '/' '>' | '<' tag_name '>' space? tag '<' '/' tag_name '>'
+
+tag_name ::= b | i | p | a
+
+void_tag_name ::= br
+
+any_tag_name ::= word | word '-' any_tag_name
+
+component ::= custom_component | vaadin_component
+
+vaadin_component ::= '<' v '-' any_tag_name '>'
+
+word ::= character+
+
+character ::= a | b | c | d | e | f | g | h | i | j | k | l | m | n | o | p | q | r | s | t | u | v | w | x | y | z
