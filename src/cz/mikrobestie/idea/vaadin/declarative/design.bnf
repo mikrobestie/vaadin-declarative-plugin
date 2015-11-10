@@ -25,9 +25,15 @@
 document ::= html_tag | component
 
 // HTML head
-html_tag ::= '<' html '>'
+html_tag ::= '<' html '>' head_tag? body_tag '<' '/' html '>'
 
-tag ::= '<' void_tag_name '/' '>' | '<' tag_name '>' space? tag '<' '/' tag_name '>'
+head_tag ::= '<' head '>' meta_tag* '<' '/' head '>'
+
+meta_tag ::= '<' meta '/' '>'
+
+body_tag ::= '<' body '>' component '<' '/' body '>'
+
+tag ::= '<' void_tag_name '/' '>' | '<' tag_name '>' tag* '<' '/' tag_name '>'
 
 tag_name ::= b | i | p | a
 
@@ -37,7 +43,7 @@ any_tag_name ::= word | word '-' any_tag_name
 
 component ::= custom_component | vaadin_component
 
-vaadin_component ::= '<' v '-' any_tag_name '>'
+vaadin_component ::= '<' v- any_tag_name '>'
 
 word ::= character+
 
