@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="package-mapping" content="svf:cz.syntea.svj.app.component.field"/>
+    <meta name="package-mapping" content="c:cz.syntea.svj.app.component"/>
+</head>
+<body>
+<v-css-layout style-name="card new-form" width-full>
+    <v-horizontal-layout style-name="v-panel-caption" width-full>
+        <v-label _id="lblCaption" style-name="v-captiontext" :expand :middle :left/>
+        <v-button _id="butEdit" style-name="borderless small" :middle :right icon="font://PENCIL"/>
+    </v-horizontal-layout>
+    <v-vertical-layout _id="readLayout" spacing margin width-full>
+        <v-label _id="lblTypUcastnika"/>
+        <v-label _id="lblJednotky"/>
+        <v-label _id="lblCasPrichodu"/>
+        <v-label _id="lblCasOdchodu"/>
+    </v-vertical-layout>
+    <v-vertical-layout _id="editLayout" spacing margin width-full>
+        <svf-uzivatel-suggest-field _id="sfUzivatel" width-full/>
+        <v-text-field _id="tfJinaOsoba" width-full null-representation=""/>
+        <v-combo-box _id="cbTypUcastnika" width="16em" null-selection-allowed="false"/>
+        <c-zobrazitelny-token-field _id="jednotkaTokenField" width-full/>
+        <v-css-layout _id="lPrichod" style-name="v-component-group" spacing>
+            <v-popup-date-field _id="dfPrichod" null-representation=""/>
+            <v-button _id="butAktualniPrichod"/>
+        </v-css-layout>
+        <v-css-layout _id="lOdchod" style-name="v-component-group" spacing>
+            <v-popup-date-field _id="dfOdchod" null-representation=""/>
+            <v-button _id="butAktualniOdchod"/>
+        </v-css-layout>
+        <v-horizontal-layout _id="buttonsLayout" spacing width-full>
+            <v-horizontal-layout spacing>
+                <v-button _id="butSave" style-name="primary"/>
+                <v-button _id="butCancel" icon="font://PENCIL"/>
+            </v-horizontal-layout>
+            <v-button _id="butRemove" icon="font://TRASH_O" style-name="danger" :expand :right/>
+        </v-horizontal-layout>
+    </v-vertical-layout>
+</v-css-layout>
+</body>
+</html>

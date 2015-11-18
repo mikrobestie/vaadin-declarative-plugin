@@ -1,5 +1,6 @@
 {
   parserClass = 'cz.mikrobestie.idea.vaadin.declarative.lang.VaadinDesignParser'
+  parserUtilClass="cz.mikrobestie.idea.vaadin.declarative.lang.VaadinDesignParserUtil"
 
   extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
 
@@ -11,40 +12,19 @@
   elementTypeHolderClass="cz.mikrobestie.idea.vaadin.declarative.psi.VDTypes"
   elementTypeClass="cz.mikrobestie.idea.vaadin.declarative.psi.VDElementType"
   tokenTypeClass="cz.mikrobestie.idea.vaadin.declarative.psi.VDTokenType"
-
-    tokens = [
-        L_BRACKET='<'
-        R_BRACKET='>'
-        SLASH='/'
-
-        space='regexp:\s+'
-        identifier='regexp:([a-z]-)+'
-    ]
 }
 
-document ::= html_tag | component
-
-// HTML head
-html_tag ::= '<' html '>' head_tag? body_tag '<' '/' html '>'
-
-head_tag ::= '<' head '>' meta_tag* '<' '/' head '>'
-
-meta_tag ::= '<' meta '/' '>'
-
-body_tag ::= '<' body '>' component '<' '/' body '>'
-
-tag ::= '<' void_tag_name '/' '>' | '<' tag_name '>' tag* '<' '/' tag_name '>'
-
-tag_name ::= b | i | p | a
-
-void_tag_name ::= br
-
-any_tag_name ::= word | word '-' any_tag_name
-
-component ::= custom_component | vaadin_component
-
-vaadin_component ::= '<' v- any_tag_name '>'
-
-word ::= character+
-
-character ::= a | b | c | d | e | f | g | h | i | j | k | l | m | n | o | p | q | r | s | t | u | v | w | x | y | z
+Document ::= (Doctype Whitespaces)? (HtmlTag | Component)
+Doctype ::= '<!DOCTYPE html>'
+HtmlTag ::= '<html' Attrs? '>' Whitespaces HeadTag? BodyTag '</html>'
+HeadTag ::= '<head>' MetaTag* '</head>'
+MetaTag ::= '<meta' '/>'
+BodyTag ::= '<body>' Whitespaces Component Whitespaces '</body>'
+HtmlContent ::= (EL_OPEN VOID_TAG_NAME '/>') | (EL_OPEN PAIR_TAG_NAME '>' HtmlContent* '</' PAIR_TAG_NAME '>')
+Component ::= EL_OPEN NAME Attrs? ('/>' | '>' HtmlContent '</' NAME '>')
+Attrs ::= (Whitespaces Attr)+
+Attr ::= LocalIdAttr | AttrWithValue | ParentAttr
+LocalIdAttr ::= '_id=' ATTR_VALUE
+ParentAttr ::= ':' AttrWithValue
+AttrWithValue ::= NAME ('=' ATTR_VALUE)?
+Whitespaces ::= (WHITE_SPACE | CRLF)*
