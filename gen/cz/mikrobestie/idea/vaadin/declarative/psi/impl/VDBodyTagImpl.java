@@ -28,10 +28,4 @@ public class VDBodyTagImpl extends ASTWrapperPsiElement implements VDBodyTag {
     return findNotNullChildByClass(VDComponent.class);
   }
 
-  @Override
-  @NotNull
-  public List<VDWhitespaces> getWhitespacesList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, VDWhitespaces.class);
-  }
-
 }

@@ -7,16 +7,13 @@ import com.intellij.psi.PsiElement;
 
 public interface VDHtmlTag extends PsiElement {
 
-  @Nullable
-  VDAttrs getAttrs();
+  @NotNull
+  List<VDAttr> getAttrList();
 
   @NotNull
   VDBodyTag getBodyTag();
 
   @Nullable
   VDHeadTag getHeadTag();
-
-  @NotNull
-  VDWhitespaces getWhitespaces();
 
 }

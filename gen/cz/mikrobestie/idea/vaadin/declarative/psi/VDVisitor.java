@@ -15,10 +15,6 @@ public class VDVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
-  public void visitAttrs(@NotNull VDAttrs o) {
-    visitPsiElement(o);
-  }
-
   public void visitBodyTag(@NotNull VDBodyTag o) {
     visitPsiElement(o);
   }
@@ -52,10 +48,6 @@ public class VDVisitor extends PsiElementVisitor {
   }
 
   public void visitParentAttr(@NotNull VDParentAttr o) {
-    visitPsiElement(o);
-  }
-
-  public void visitWhitespaces(@NotNull VDWhitespaces o) {
     visitPsiElement(o);
   }
 

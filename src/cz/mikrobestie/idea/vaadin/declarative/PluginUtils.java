@@ -4,6 +4,13 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.PackageIndex;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
+import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.psi.search.searches.ClassInheritorsSearch;
+import com.intellij.util.Query;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by Michal on 15.11.2015.
@@ -33,5 +40,27 @@ public class PluginUtils {
             return psiPackage.getClasses();
         }
         return new PsiClass[0];
+    }
+
+    /**
+     * Searches for all classes implementing / extending given class name, placed in the given package.
+     *
+     * @param project Project
+     * @param packageName Package name
+     * @param inheritsClass Superclass / Interface class name
+     * @return Array of found classes
+     */
+    public static List<PsiClass> findClasses(Project project, String packageName, String inheritsClass) {
+
+        GlobalSearchScope scope = GlobalSearchScope.allScope(project);
+
+        PsiClass psiClass = JavaPsiFacade.getInstance(project).findClass(inheritsClass, scope);
+        if (psiClass != null) {
+            Query<PsiClass> query = ClassInheritorsSearch.search(psiClass, scope, true);
+            return query.findAll().stream()
+                    .filter(c -> c.getQualifiedName() != null && c.getQualifiedName().startsWith(packageName))
+                    .collect(Collectors.toList());
+        }
+        return Collections.EMPTY_LIST;
     }
 }

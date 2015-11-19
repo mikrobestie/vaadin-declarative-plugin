@@ -14,17 +14,15 @@
   tokenTypeClass="cz.mikrobestie.idea.vaadin.declarative.psi.VDTokenType"
 }
 
-Document ::= (Doctype Whitespaces)? (HtmlTag | Component)
+Document ::= Doctype? (HtmlTag | Component)
 Doctype ::= '<!DOCTYPE html>'
-HtmlTag ::= '<html' Attrs? '>' Whitespaces HeadTag? BodyTag '</html>'
+HtmlTag ::= '<html' Attr* EL_RIGHT HeadTag? BodyTag '</html>'
 HeadTag ::= '<head>' MetaTag* '</head>'
-MetaTag ::= '<meta' '/>'
-BodyTag ::= '<body>' Whitespaces Component Whitespaces '</body>'
-HtmlContent ::= (EL_OPEN VOID_TAG_NAME '/>') | (EL_OPEN PAIR_TAG_NAME '>' HtmlContent* '</' PAIR_TAG_NAME '>')
-Component ::= EL_OPEN NAME Attrs? ('/>' | '>' HtmlContent '</' NAME '>')
-Attrs ::= (Whitespaces Attr)+
-Attr ::= LocalIdAttr | AttrWithValue | ParentAttr
+MetaTag ::= '<meta' EL_CLOSE_RIGHT
+BodyTag ::= '<body>' Component '</body>'
+HtmlContent ::= (EL_LEFT NAME EL_CLOSE_RIGHT) | (EL_LEFT NAME EL_RIGHT HtmlContent* EL_CLOSE_LEFT NAME EL_RIGHT)
+Component ::= EL_LEFT NAME Attr* (EL_CLOSE_RIGHT | EL_RIGHT (HtmlContent | Component*) EL_CLOSE_LEFT NAME EL_RIGHT)
+Attr ::= (LocalIdAttr | AttrWithValue | ParentAttr)
 LocalIdAttr ::= '_id=' ATTR_VALUE
 ParentAttr ::= ':' AttrWithValue
 AttrWithValue ::= NAME ('=' ATTR_VALUE)?
-Whitespaces ::= (WHITE_SPACE | CRLF)*

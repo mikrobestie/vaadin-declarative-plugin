@@ -7,8 +7,11 @@ import com.intellij.psi.PsiElement;
 
 public interface VDComponent extends PsiElement {
 
-  @Nullable
-  VDAttrs getAttrs();
+  @NotNull
+  List<VDAttr> getAttrList();
+
+  @NotNull
+  List<VDComponent> getComponentList();
 
   @Nullable
   VDHtmlContent getHtmlContent();

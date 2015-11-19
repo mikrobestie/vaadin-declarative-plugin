@@ -10,7 +10,4 @@ public interface VDBodyTag extends PsiElement {
   @NotNull
   VDComponent getComponent();
 
-  @NotNull
-  List<VDWhitespaces> getWhitespacesList();
-
 }

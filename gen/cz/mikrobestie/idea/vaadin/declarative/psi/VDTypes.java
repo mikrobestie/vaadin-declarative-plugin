@@ -9,7 +9,6 @@ import cz.mikrobestie.idea.vaadin.declarative.psi.impl.*;
 public interface VDTypes {
 
   IElementType ATTR = new VDElementType("ATTR");
-  IElementType ATTRS = new VDElementType("ATTRS");
   IElementType ATTR_WITH_VALUE = new VDElementType("ATTR_WITH_VALUE");
   IElementType BODY_TAG = new VDElementType("BODY_TAG");
   IElementType COMPONENT = new VDElementType("COMPONENT");
@@ -20,24 +19,19 @@ public interface VDTypes {
   IElementType LOCAL_ID_ATTR = new VDElementType("LOCAL_ID_ATTR");
   IElementType META_TAG = new VDElementType("META_TAG");
   IElementType PARENT_ATTR = new VDElementType("PARENT_ATTR");
-  IElementType WHITESPACES = new VDElementType("WHITESPACES");
 
   IElementType ATTR_VALUE = new VDTokenType("ATTR_VALUE");
-  IElementType CRLF = new VDTokenType("CRLF");
-  IElementType EL_OPEN = new VDTokenType("EL_OPEN");
+  IElementType EL_CLOSE_LEFT = new VDTokenType("EL_CLOSE_LEFT");
+  IElementType EL_CLOSE_RIGHT = new VDTokenType("EL_CLOSE_RIGHT");
+  IElementType EL_LEFT = new VDTokenType("EL_LEFT");
+  IElementType EL_RIGHT = new VDTokenType("EL_RIGHT");
   IElementType NAME = new VDTokenType("NAME");
-  IElementType PAIR_TAG_NAME = new VDTokenType("PAIR_TAG_NAME");
-  IElementType VOID_TAG_NAME = new VDTokenType("VOID_TAG_NAME");
-  IElementType WHITE_SPACE = new VDTokenType("WHITE_SPACE");
 
   class Factory {
     public static PsiElement createElement(ASTNode node) {
       IElementType type = node.getElementType();
        if (type == ATTR) {
         return new VDAttrImpl(node);
-      }
-      else if (type == ATTRS) {
-        return new VDAttrsImpl(node);
       }
       else if (type == ATTR_WITH_VALUE) {
         return new VDAttrWithValueImpl(node);
@@ -68,9 +62,6 @@ public interface VDTypes {
       }
       else if (type == PARENT_ATTR) {
         return new VDParentAttrImpl(node);
-      }
-      else if (type == WHITESPACES) {
-        return new VDWhitespacesImpl(node);
       }
       throw new AssertionError("Unknown element type: " + type);
     }

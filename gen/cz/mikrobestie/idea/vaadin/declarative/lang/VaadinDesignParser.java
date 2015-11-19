@@ -29,9 +29,6 @@ public class VaadinDesignParser implements PsiParser, LightPsiParser {
     else if (t == ATTR_WITH_VALUE) {
       r = AttrWithValue(b, 0);
     }
-    else if (t == ATTRS) {
-      r = Attrs(b, 0);
-    }
     else if (t == BODY_TAG) {
       r = BodyTag(b, 0);
     }
@@ -58,9 +55,6 @@ public class VaadinDesignParser implements PsiParser, LightPsiParser {
     }
     else if (t == PARENT_ATTR) {
       r = ParentAttr(b, 0);
-    }
-    else if (t == WHITESPACES) {
-      r = Whitespaces(b, 0);
     }
     else {
       r = parse_root_(t, b, 0);
@@ -117,92 +111,88 @@ public class VaadinDesignParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // (Whitespaces Attr)+
-  public static boolean Attrs(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "Attrs")) return false;
-    boolean r;
-    Marker m = enter_section_(b, l, _NONE_, "<attrs>");
-    r = Attrs_0(b, l + 1);
-    int c = current_position_(b);
-    while (r) {
-      if (!Attrs_0(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "Attrs", c)) break;
-      c = current_position_(b);
-    }
-    exit_section_(b, l, m, ATTRS, r, false, null);
-    return r;
-  }
-
-  // Whitespaces Attr
-  private static boolean Attrs_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "Attrs_0")) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = Whitespaces(b, l + 1);
-    r = r && Attr(b, l + 1);
-    exit_section_(b, m, null, r);
-    return r;
-  }
-
-  /* ********************************************************** */
-  // '<body>' Whitespaces Component Whitespaces '</body>'
+  // '<body>' Component '</body>'
   public static boolean BodyTag(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "BodyTag")) return false;
     boolean r;
     Marker m = enter_section_(b, l, _NONE_, "<body tag>");
     r = consumeToken(b, "<body>");
-    r = r && Whitespaces(b, l + 1);
     r = r && Component(b, l + 1);
-    r = r && Whitespaces(b, l + 1);
     r = r && consumeToken(b, "</body>");
     exit_section_(b, l, m, BODY_TAG, r, false, null);
     return r;
   }
 
   /* ********************************************************** */
-  // EL_OPEN NAME Attrs? ('/>' | '>' HtmlContent '</' NAME '>')
+  // EL_LEFT NAME Attr* (EL_CLOSE_RIGHT | EL_RIGHT (HtmlContent | Component*) EL_CLOSE_LEFT NAME EL_RIGHT)
   public static boolean Component(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "Component")) return false;
-    if (!nextTokenIs(b, EL_OPEN)) return false;
+    if (!nextTokenIs(b, EL_LEFT)) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = consumeTokens(b, 0, EL_OPEN, NAME);
+    r = consumeTokens(b, 0, EL_LEFT, NAME);
     r = r && Component_2(b, l + 1);
     r = r && Component_3(b, l + 1);
     exit_section_(b, m, COMPONENT, r);
     return r;
   }
 
-  // Attrs?
+  // Attr*
   private static boolean Component_2(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "Component_2")) return false;
-    Attrs(b, l + 1);
+    int c = current_position_(b);
+    while (true) {
+      if (!Attr(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "Component_2", c)) break;
+      c = current_position_(b);
+    }
     return true;
   }
 
-  // '/>' | '>' HtmlContent '</' NAME '>'
+  // EL_CLOSE_RIGHT | EL_RIGHT (HtmlContent | Component*) EL_CLOSE_LEFT NAME EL_RIGHT
   private static boolean Component_3(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "Component_3")) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = consumeToken(b, "/>");
+    r = consumeToken(b, EL_CLOSE_RIGHT);
     if (!r) r = Component_3_1(b, l + 1);
     exit_section_(b, m, null, r);
     return r;
   }
 
-  // '>' HtmlContent '</' NAME '>'
+  // EL_RIGHT (HtmlContent | Component*) EL_CLOSE_LEFT NAME EL_RIGHT
   private static boolean Component_3_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "Component_3_1")) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = consumeToken(b, ">");
-    r = r && HtmlContent(b, l + 1);
-    r = r && consumeToken(b, "</");
-    r = r && consumeToken(b, NAME);
-    r = r && consumeToken(b, ">");
+    r = consumeToken(b, EL_RIGHT);
+    r = r && Component_3_1_1(b, l + 1);
+    r = r && consumeTokens(b, 0, EL_CLOSE_LEFT, NAME, EL_RIGHT);
     exit_section_(b, m, null, r);
     return r;
+  }
+
+  // HtmlContent | Component*
+  private static boolean Component_3_1_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "Component_3_1_1")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = HtmlContent(b, l + 1);
+    if (!r) r = Component_3_1_1_1(b, l + 1);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // Component*
+  private static boolean Component_3_1_1_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "Component_3_1_1_1")) return false;
+    int c = current_position_(b);
+    while (true) {
+      if (!Component(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "Component_3_1_1_1", c)) break;
+      c = current_position_(b);
+    }
+    return true;
   }
 
   /* ********************************************************** */
@@ -217,7 +207,7 @@ public class VaadinDesignParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // (Doctype Whitespaces)? (HtmlTag | Component)
+  // Doctype? (HtmlTag | Component)
   static boolean Document(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "Document")) return false;
     boolean r;
@@ -228,22 +218,11 @@ public class VaadinDesignParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // (Doctype Whitespaces)?
+  // Doctype?
   private static boolean Document_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "Document_0")) return false;
-    Document_0_0(b, l + 1);
+    Doctype(b, l + 1);
     return true;
-  }
-
-  // Doctype Whitespaces
-  private static boolean Document_0_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "Document_0_0")) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = Doctype(b, l + 1);
-    r = r && Whitespaces(b, l + 1);
-    exit_section_(b, m, null, r);
-    return r;
   }
 
   // HtmlTag | Component
@@ -283,10 +262,10 @@ public class VaadinDesignParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // (EL_OPEN VOID_TAG_NAME '/>') | (EL_OPEN PAIR_TAG_NAME '>' HtmlContent* '</' PAIR_TAG_NAME '>')
+  // (EL_LEFT NAME EL_CLOSE_RIGHT) | (EL_LEFT NAME EL_RIGHT HtmlContent* EL_CLOSE_LEFT NAME EL_RIGHT)
   public static boolean HtmlContent(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "HtmlContent")) return false;
-    if (!nextTokenIs(b, EL_OPEN)) return false;
+    if (!nextTokenIs(b, EL_LEFT)) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = HtmlContent_0(b, l + 1);
@@ -295,28 +274,24 @@ public class VaadinDesignParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // EL_OPEN VOID_TAG_NAME '/>'
+  // EL_LEFT NAME EL_CLOSE_RIGHT
   private static boolean HtmlContent_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "HtmlContent_0")) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = consumeTokens(b, 0, EL_OPEN, VOID_TAG_NAME);
-    r = r && consumeToken(b, "/>");
+    r = consumeTokens(b, 0, EL_LEFT, NAME, EL_CLOSE_RIGHT);
     exit_section_(b, m, null, r);
     return r;
   }
 
-  // EL_OPEN PAIR_TAG_NAME '>' HtmlContent* '</' PAIR_TAG_NAME '>'
+  // EL_LEFT NAME EL_RIGHT HtmlContent* EL_CLOSE_LEFT NAME EL_RIGHT
   private static boolean HtmlContent_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "HtmlContent_1")) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = consumeTokens(b, 0, EL_OPEN, PAIR_TAG_NAME);
-    r = r && consumeToken(b, ">");
+    r = consumeTokens(b, 0, EL_LEFT, NAME, EL_RIGHT);
     r = r && HtmlContent_1_3(b, l + 1);
-    r = r && consumeToken(b, "</");
-    r = r && consumeToken(b, PAIR_TAG_NAME);
-    r = r && consumeToken(b, ">");
+    r = r && consumeTokens(b, 0, EL_CLOSE_LEFT, NAME, EL_RIGHT);
     exit_section_(b, m, null, r);
     return r;
   }
@@ -334,32 +309,36 @@ public class VaadinDesignParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // '<html' Attrs? '>' Whitespaces HeadTag? BodyTag '</html>'
+  // '<html' Attr* EL_RIGHT HeadTag? BodyTag '</html>'
   public static boolean HtmlTag(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "HtmlTag")) return false;
     boolean r;
     Marker m = enter_section_(b, l, _NONE_, "<html tag>");
     r = consumeToken(b, "<html");
     r = r && HtmlTag_1(b, l + 1);
-    r = r && consumeToken(b, ">");
-    r = r && Whitespaces(b, l + 1);
-    r = r && HtmlTag_4(b, l + 1);
+    r = r && consumeToken(b, EL_RIGHT);
+    r = r && HtmlTag_3(b, l + 1);
     r = r && BodyTag(b, l + 1);
     r = r && consumeToken(b, "</html>");
     exit_section_(b, l, m, HTML_TAG, r, false, null);
     return r;
   }
 
-  // Attrs?
+  // Attr*
   private static boolean HtmlTag_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "HtmlTag_1")) return false;
-    Attrs(b, l + 1);
+    int c = current_position_(b);
+    while (true) {
+      if (!Attr(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "HtmlTag_1", c)) break;
+      c = current_position_(b);
+    }
     return true;
   }
 
   // HeadTag?
-  private static boolean HtmlTag_4(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "HtmlTag_4")) return false;
+  private static boolean HtmlTag_3(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "HtmlTag_3")) return false;
     HeadTag(b, l + 1);
     return true;
   }
@@ -377,13 +356,13 @@ public class VaadinDesignParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // '<meta' '/>'
+  // '<meta' EL_CLOSE_RIGHT
   public static boolean MetaTag(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "MetaTag")) return false;
     boolean r;
     Marker m = enter_section_(b, l, _NONE_, "<meta tag>");
     r = consumeToken(b, "<meta");
-    r = r && consumeToken(b, "/>");
+    r = r && consumeToken(b, EL_CLOSE_RIGHT);
     exit_section_(b, l, m, META_TAG, r, false, null);
     return r;
   }
@@ -397,32 +376,6 @@ public class VaadinDesignParser implements PsiParser, LightPsiParser {
     r = consumeToken(b, ":");
     r = r && AttrWithValue(b, l + 1);
     exit_section_(b, l, m, PARENT_ATTR, r, false, null);
-    return r;
-  }
-
-  /* ********************************************************** */
-  // (WHITE_SPACE | CRLF)*
-  public static boolean Whitespaces(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "Whitespaces")) return false;
-    Marker m = enter_section_(b, l, _NONE_, "<whitespaces>");
-    int c = current_position_(b);
-    while (true) {
-      if (!Whitespaces_0(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "Whitespaces", c)) break;
-      c = current_position_(b);
-    }
-    exit_section_(b, l, m, WHITESPACES, true, false, null);
-    return true;
-  }
-
-  // WHITE_SPACE | CRLF
-  private static boolean Whitespaces_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "Whitespaces_0")) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = consumeToken(b, WHITE_SPACE);
-    if (!r) r = consumeToken(b, CRLF);
-    exit_section_(b, m, null, r);
     return r;
   }
 

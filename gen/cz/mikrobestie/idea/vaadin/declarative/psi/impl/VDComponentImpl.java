@@ -23,9 +23,15 @@ public class VDComponentImpl extends ASTWrapperPsiElement implements VDComponent
   }
 
   @Override
-  @Nullable
-  public VDAttrs getAttrs() {
-    return findChildByClass(VDAttrs.class);
+  @NotNull
+  public List<VDAttr> getAttrList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, VDAttr.class);
+  }
+
+  @Override
+  @NotNull
+  public List<VDComponent> getComponentList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, VDComponent.class);
   }
 
   @Override

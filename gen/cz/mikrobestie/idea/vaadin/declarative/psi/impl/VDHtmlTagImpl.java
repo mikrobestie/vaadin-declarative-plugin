@@ -23,9 +23,9 @@ public class VDHtmlTagImpl extends ASTWrapperPsiElement implements VDHtmlTag {
   }
 
   @Override
-  @Nullable
-  public VDAttrs getAttrs() {
-    return findChildByClass(VDAttrs.class);
+  @NotNull
+  public List<VDAttr> getAttrList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, VDAttr.class);
   }
 
   @Override
@@ -38,12 +38,6 @@ public class VDHtmlTagImpl extends ASTWrapperPsiElement implements VDHtmlTag {
   @Nullable
   public VDHeadTag getHeadTag() {
     return findChildByClass(VDHeadTag.class);
-  }
-
-  @Override
-  @NotNull
-  public VDWhitespaces getWhitespaces() {
-    return findNotNullChildByClass(VDWhitespaces.class);
   }
 
 }

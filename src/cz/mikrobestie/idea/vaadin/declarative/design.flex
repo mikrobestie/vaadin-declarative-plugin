@@ -7,38 +7,42 @@ import cz.mikrobestie.idea.vaadin.declarative.psi.VDTypes;
 
 %%
 
+%{
+  public VaadinDesignLexer() {
+    this((java.io.Reader)null);
+  }
+%}
+
+%public
 %class VaadinDesignLexer
 %implements FlexLexer
-%unicode
 %function advance
 %type IElementType
-%eof{  return;
-%eof}
+%unicode
 
-WHITE_SPACE=[\ \t\f]
-CRLF=\r|\n|\r\n
-VOID_TAG_NAME=br
-PAIR_TAG_NAME=p|b|i
-NAME=[a-z]+(-[a-z]+)+
+WHITE_SPACE=[\ \t\f\r\n]
+NAME=[a-z]+(-[a-z]+)*
 ATTR_VALUE=\"[^\"]*\"|'[^']*'
-EL_OPEN=<
+EL_LEFT=<
+EL_RIGHT=>
+EL_CLOSE_LEFT=<\/
+EL_CLOSE_RIGHT=\/>
 
-%state WAITING_VALUE
 
 %%
 
-<YYINITIAL> {WHITE_SPACE}+                                  { yybegin(YYINITIAL); return TokenType.WHITE_SPACE; }
+{WHITE_SPACE}+                      { return TokenType.WHITE_SPACE; }
 
-<YYINITIAL> {CRLF}                                          { yybegin(YYINITIAL); return VDTypes.CRLF; }
+{NAME}                              { return VDTypes.NAME; }
 
-<YYINITIAL> {VOID_TAG_NAME}                                 { yybegin(YYINITIAL); return VDTypes.VOID_TAG_NAME; }
+{EL_LEFT}                           { return VDTypes.EL_LEFT; }
 
-<YYINITIAL> {PAIR_TAG_NAME}                                 { yybegin(YYINITIAL); return VDTypes.PAIR_TAG_NAME; }
+{EL_RIGHT}                          { return VDTypes.EL_RIGHT; }
 
-<YYINITIAL> {NAME}                                          { yybegin(YYINITIAL); return VDTypes.NAME; }
+{EL_CLOSE_LEFT}                     { return VDTypes.EL_CLOSE_LEFT; }
 
-<YYINITIAL> {EL_OPEN}                                       { yybegin(YYINITIAL); return VDTypes.EL_OPEN; }
+{EL_CLOSE_RIGHT}                    { return VDTypes.EL_CLOSE_RIGHT; }
 
-<YYINITIAL> {ATTR_VALUE}                                    { yybegin(YYINITIAL); return VDTypes.ATTR_VALUE; }
+{ATTR_VALUE}                        { return VDTypes.ATTR_VALUE; }
 
-.                                                           { return TokenType.BAD_CHARACTER; }
+[^]                                 { return TokenType.BAD_CHARACTER; }
