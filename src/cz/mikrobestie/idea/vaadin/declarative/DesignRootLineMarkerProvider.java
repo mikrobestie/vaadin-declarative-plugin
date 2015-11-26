@@ -29,12 +29,13 @@ public class DesignRootLineMarkerProvider extends RelatedItemLineMarkerProvider 
 
             // Find file
             PsiFile designFile = PluginUtils.findResourcePsiFile(element.getProject(), javaFile.getPackageName(), designFileName);
-
-            NavigationGutterIconBuilder<PsiElement> builder =
-                    NavigationGutterIconBuilder.create(VaadinIcons.VAADIN_16)
-                            .setTarget(designFile)
-                            .setTooltipText("Go to design file: " + designFileName);
-            result.add(builder.createLineMarkerInfo(element));
+            if (designFile != null) {
+                NavigationGutterIconBuilder<PsiElement> builder =
+                        NavigationGutterIconBuilder.create(VaadinIcons.VAADIN_16)
+                                .setTarget(designFile)
+                                .setTooltipText("Go to design file: " + designFileName);
+                result.add(builder.createLineMarkerInfo(element));
+            }
         }
     }
 }

@@ -23,9 +23,9 @@ public class VDBodyTagImpl extends ASTWrapperPsiElement implements VDBodyTag {
   }
 
   @Override
-  @NotNull
+  @Nullable
   public VDComponent getComponent() {
-    return findNotNullChildByClass(VDComponent.class);
+    return findChildByClass(VDComponent.class);
   }
 
 }

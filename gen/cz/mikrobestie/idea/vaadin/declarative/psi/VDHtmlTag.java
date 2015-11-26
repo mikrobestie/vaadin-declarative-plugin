@@ -10,7 +10,7 @@ public interface VDHtmlTag extends PsiElement {
   @NotNull
   List<VDAttr> getAttrList();
 
-  @NotNull
+  @Nullable
   VDBodyTag getBodyTag();
 
   @Nullable

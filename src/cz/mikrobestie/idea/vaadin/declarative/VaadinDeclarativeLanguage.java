@@ -1,8 +1,6 @@
 package cz.mikrobestie.idea.vaadin.declarative;
 
 import com.intellij.lang.Language;
-import org.jetbrains.annotations.NonNls;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * Created by Michal on 9.11.2015.

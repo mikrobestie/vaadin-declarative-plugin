@@ -5,7 +5,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface VDComponent extends PsiElement {
+public interface VDComponent extends VDNamedElement {
 
   @NotNull
   List<VDAttr> getAttrList();

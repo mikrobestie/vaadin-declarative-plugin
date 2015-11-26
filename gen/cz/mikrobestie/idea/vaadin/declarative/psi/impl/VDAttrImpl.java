@@ -22,22 +22,4 @@ public class VDAttrImpl extends ASTWrapperPsiElement implements VDAttr {
     else super.accept(visitor);
   }
 
-  @Override
-  @Nullable
-  public VDAttrWithValue getAttrWithValue() {
-    return findChildByClass(VDAttrWithValue.class);
-  }
-
-  @Override
-  @Nullable
-  public VDLocalIdAttr getLocalIdAttr() {
-    return findChildByClass(VDLocalIdAttr.class);
-  }
-
-  @Override
-  @Nullable
-  public VDParentAttr getParentAttr() {
-    return findChildByClass(VDParentAttr.class);
-  }
-
 }

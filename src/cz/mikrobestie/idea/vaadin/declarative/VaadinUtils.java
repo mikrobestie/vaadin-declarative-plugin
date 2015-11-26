@@ -7,17 +7,22 @@ import com.intellij.psi.PsiClass;
  */
 public class VaadinUtils {
 
-    public static String getClassDesignName(PsiClass psiClass) {
+    public static String getClassDesignName(PsiClass psiClass, String prefix) {
 
-        if (psiClass.getQualifiedName() == null || !psiClass.getQualifiedName().startsWith("com.vaadin.ui.")) {
-            throw new IllegalArgumentException("Cannot find html element name of class " + psiClass.getQualifiedName());
-        }
-
-        String element = "v";
+        String element = prefix;
         String[] split = psiClass.getName().split("(?=\\p{Upper})");
         for (String part : split) {
             element += "-" + part.toLowerCase();
         }
         return element;
+    }
+
+    public static String getDesignClassName(String designNameWithoutPrefix) {
+
+        String result = "";
+        for (String part : designNameWithoutPrefix.split("-")) {
+            result += part.substring(0, 1).toUpperCase() + part.substring(1);
+        }
+        return result;
     }
 }

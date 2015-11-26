@@ -9,23 +9,30 @@ import cz.mikrobestie.idea.vaadin.declarative.psi.impl.*;
 public interface VDTypes {
 
   IElementType ATTR = new VDElementType("ATTR");
-  IElementType ATTR_WITH_VALUE = new VDElementType("ATTR_WITH_VALUE");
   IElementType BODY_TAG = new VDElementType("BODY_TAG");
   IElementType COMPONENT = new VDElementType("COMPONENT");
-  IElementType DOCTYPE = new VDElementType("DOCTYPE");
   IElementType HEAD_TAG = new VDElementType("HEAD_TAG");
   IElementType HTML_CONTENT = new VDElementType("HTML_CONTENT");
   IElementType HTML_TAG = new VDElementType("HTML_TAG");
-  IElementType LOCAL_ID_ATTR = new VDElementType("LOCAL_ID_ATTR");
   IElementType META_TAG = new VDElementType("META_TAG");
-  IElementType PARENT_ATTR = new VDElementType("PARENT_ATTR");
 
+  IElementType ATTR_NAME = new VDTokenType("ATTR_NAME");
   IElementType ATTR_VALUE = new VDTokenType("ATTR_VALUE");
+  IElementType COMMENT = new VDTokenType("COMMENT");
+  IElementType DOCTYPE_DECL = new VDTokenType("DOCTYPE_DECL");
+  IElementType ELEM_NAME = new VDTokenType("ELEM_NAME");
   IElementType EL_CLOSE_LEFT = new VDTokenType("EL_CLOSE_LEFT");
   IElementType EL_CLOSE_RIGHT = new VDTokenType("EL_CLOSE_RIGHT");
   IElementType EL_LEFT = new VDTokenType("EL_LEFT");
   IElementType EL_RIGHT = new VDTokenType("EL_RIGHT");
-  IElementType NAME = new VDTokenType("NAME");
+  IElementType EQ = new VDTokenType("EQ");
+  IElementType TAG_BODY_CLOSE = new VDTokenType("TAG_BODY_CLOSE");
+  IElementType TAG_BODY_OPEN = new VDTokenType("TAG_BODY_OPEN");
+  IElementType TAG_HEAD_CLOSE = new VDTokenType("TAG_HEAD_CLOSE");
+  IElementType TAG_HEAD_OPEN = new VDTokenType("TAG_HEAD_OPEN");
+  IElementType TAG_HTML_CLOSE = new VDTokenType("TAG_HTML_CLOSE");
+  IElementType TAG_HTML_OPEN = new VDTokenType("TAG_HTML_OPEN");
+  IElementType TAG_META_OPEN = new VDTokenType("TAG_META_OPEN");
 
   class Factory {
     public static PsiElement createElement(ASTNode node) {
@@ -33,17 +40,11 @@ public interface VDTypes {
        if (type == ATTR) {
         return new VDAttrImpl(node);
       }
-      else if (type == ATTR_WITH_VALUE) {
-        return new VDAttrWithValueImpl(node);
-      }
       else if (type == BODY_TAG) {
         return new VDBodyTagImpl(node);
       }
       else if (type == COMPONENT) {
         return new VDComponentImpl(node);
-      }
-      else if (type == DOCTYPE) {
-        return new VDDoctypeImpl(node);
       }
       else if (type == HEAD_TAG) {
         return new VDHeadTagImpl(node);
@@ -54,14 +55,8 @@ public interface VDTypes {
       else if (type == HTML_TAG) {
         return new VDHtmlTagImpl(node);
       }
-      else if (type == LOCAL_ID_ATTR) {
-        return new VDLocalIdAttrImpl(node);
-      }
       else if (type == META_TAG) {
         return new VDMetaTagImpl(node);
-      }
-      else if (type == PARENT_ATTR) {
-        return new VDParentAttrImpl(node);
       }
       throw new AssertionError("Unknown element type: " + type);
     }

@@ -14,15 +14,16 @@
   tokenTypeClass="cz.mikrobestie.idea.vaadin.declarative.psi.VDTokenType"
 }
 
-Document ::= Doctype? (HtmlTag | Component)
-Doctype ::= '<!DOCTYPE html>'
-HtmlTag ::= '<html' Attr* EL_RIGHT HeadTag? BodyTag '</html>'
-HeadTag ::= '<head>' MetaTag* '</head>'
-MetaTag ::= '<meta' EL_CLOSE_RIGHT
-BodyTag ::= '<body>' Component '</body>'
-HtmlContent ::= (EL_LEFT NAME EL_CLOSE_RIGHT) | (EL_LEFT NAME EL_RIGHT HtmlContent* EL_CLOSE_LEFT NAME EL_RIGHT)
-Component ::= EL_LEFT NAME Attr* (EL_CLOSE_RIGHT | EL_RIGHT (HtmlContent | Component*) EL_CLOSE_LEFT NAME EL_RIGHT)
-Attr ::= (LocalIdAttr | AttrWithValue | ParentAttr)
-LocalIdAttr ::= '_id=' ATTR_VALUE
-ParentAttr ::= ':' AttrWithValue
-AttrWithValue ::= NAME ('=' ATTR_VALUE)?
+Document ::= DOCTYPE_DECL? COMMENT* (HtmlTag | Component)
+HtmlTag ::= TAG_HTML_OPEN Attr* EL_RIGHT HeadTag? BodyTag TAG_HTML_CLOSE {pin=1}
+HeadTag ::= TAG_HEAD_OPEN MetaTag* TAG_HEAD_CLOSE {pin = 1}
+MetaTag ::= TAG_META_OPEN Attr+ EL_CLOSE_RIGHT {pin = 1}
+BodyTag ::= TAG_BODY_OPEN Component TAG_BODY_CLOSE {pin = 1}
+HtmlContent ::= (EL_LEFT ELEM_NAME EL_CLOSE_RIGHT) | (EL_LEFT ELEM_NAME EL_RIGHT HtmlContent* EL_CLOSE_LEFT ELEM_NAME EL_RIGHT)
+Component ::= EL_LEFT ELEM_NAME Attr* (EL_CLOSE_RIGHT | EL_RIGHT (HtmlContent | Component*) EL_CLOSE_LEFT ELEM_NAME EL_RIGHT) {
+    pin         = 2
+    mixin       = "cz.mikrobestie.idea.vaadin.declarative.psi.impl.VDNamedElementImpl"
+    implements  = "cz.mikrobestie.idea.vaadin.declarative.psi.VDNamedElement"
+    methods     = [getKey getValue getName setName getNameIdentifier]
+}
+Attr ::= ATTR_NAME (EQ ATTR_VALUE)?

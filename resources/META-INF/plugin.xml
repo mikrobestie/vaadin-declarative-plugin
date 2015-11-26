@@ -30,6 +30,10 @@
         <codeInsight.lineMarkerProvider language="JAVA" implementationClass="cz.mikrobestie.idea.vaadin.declarative.DesignRootLineMarkerProvider"/>
         <lang.parserDefinition language="Vaadin declarative" implementationClass="cz.mikrobestie.idea.vaadin.declarative.VaadinDesignParserDefinition"/>
         <completion.contributor language="Vaadin declarative" implementationClass="cz.mikrobestie.idea.vaadin.declarative.VaadinDesignCompletionContributor"/>
+        <lang.commenter language="Vaadin declarative" implementationClass="com.intellij.lang.xml.XmlCommenter"/>
+
+        <psi.referenceContributor implementation="cz.mikrobestie.idea.vaadin.declarative.ref.VDReferenceContributor"/>
+
     </extensions>
 
     <actions>

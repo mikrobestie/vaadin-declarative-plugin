@@ -11,20 +11,12 @@ public class VDVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
-  public void visitAttrWithValue(@NotNull VDAttrWithValue o) {
-    visitPsiElement(o);
-  }
-
   public void visitBodyTag(@NotNull VDBodyTag o) {
     visitPsiElement(o);
   }
 
   public void visitComponent(@NotNull VDComponent o) {
-    visitPsiElement(o);
-  }
-
-  public void visitDoctype(@NotNull VDDoctype o) {
-    visitPsiElement(o);
+    visitNamedElement(o);
   }
 
   public void visitHeadTag(@NotNull VDHeadTag o) {
@@ -39,15 +31,11 @@ public class VDVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
-  public void visitLocalIdAttr(@NotNull VDLocalIdAttr o) {
-    visitPsiElement(o);
-  }
-
   public void visitMetaTag(@NotNull VDMetaTag o) {
     visitPsiElement(o);
   }
 
-  public void visitParentAttr(@NotNull VDParentAttr o) {
+  public void visitNamedElement(@NotNull VDNamedElement o) {
     visitPsiElement(o);
   }
 

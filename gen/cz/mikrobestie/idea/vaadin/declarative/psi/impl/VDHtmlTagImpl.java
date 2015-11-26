@@ -29,9 +29,9 @@ public class VDHtmlTagImpl extends ASTWrapperPsiElement implements VDHtmlTag {
   }
 
   @Override
-  @NotNull
+  @Nullable
   public VDBodyTag getBodyTag() {
-    return findNotNullChildByClass(VDBodyTag.class);
+    return findChildByClass(VDBodyTag.class);
   }
 
   @Override

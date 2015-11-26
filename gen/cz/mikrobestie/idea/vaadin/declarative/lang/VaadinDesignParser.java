@@ -26,17 +26,11 @@ public class VaadinDesignParser implements PsiParser, LightPsiParser {
     if (t == ATTR) {
       r = Attr(b, 0);
     }
-    else if (t == ATTR_WITH_VALUE) {
-      r = AttrWithValue(b, 0);
-    }
     else if (t == BODY_TAG) {
       r = BodyTag(b, 0);
     }
     else if (t == COMPONENT) {
       r = Component(b, 0);
-    }
-    else if (t == DOCTYPE) {
-      r = Doctype(b, 0);
     }
     else if (t == HEAD_TAG) {
       r = HeadTag(b, 0);
@@ -47,14 +41,8 @@ public class VaadinDesignParser implements PsiParser, LightPsiParser {
     else if (t == HTML_TAG) {
       r = HtmlTag(b, 0);
     }
-    else if (t == LOCAL_ID_ATTR) {
-      r = LocalIdAttr(b, 0);
-    }
     else if (t == META_TAG) {
       r = MetaTag(b, 0);
-    }
-    else if (t == PARENT_ATTR) {
-      r = ParentAttr(b, 0);
     }
     else {
       r = parse_root_(t, b, 0);
@@ -67,74 +55,63 @@ public class VaadinDesignParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // LocalIdAttr | AttrWithValue | ParentAttr
+  // ATTR_NAME (EQ ATTR_VALUE)?
   public static boolean Attr(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "Attr")) return false;
-    boolean r;
-    Marker m = enter_section_(b, l, _NONE_, "<attr>");
-    r = LocalIdAttr(b, l + 1);
-    if (!r) r = AttrWithValue(b, l + 1);
-    if (!r) r = ParentAttr(b, l + 1);
-    exit_section_(b, l, m, ATTR, r, false, null);
-    return r;
-  }
-
-  /* ********************************************************** */
-  // NAME ('=' ATTR_VALUE)?
-  public static boolean AttrWithValue(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "AttrWithValue")) return false;
-    if (!nextTokenIs(b, NAME)) return false;
+    if (!nextTokenIs(b, ATTR_NAME)) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = consumeToken(b, NAME);
-    r = r && AttrWithValue_1(b, l + 1);
-    exit_section_(b, m, ATTR_WITH_VALUE, r);
+    r = consumeToken(b, ATTR_NAME);
+    r = r && Attr_1(b, l + 1);
+    exit_section_(b, m, ATTR, r);
     return r;
   }
 
-  // ('=' ATTR_VALUE)?
-  private static boolean AttrWithValue_1(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "AttrWithValue_1")) return false;
-    AttrWithValue_1_0(b, l + 1);
+  // (EQ ATTR_VALUE)?
+  private static boolean Attr_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "Attr_1")) return false;
+    Attr_1_0(b, l + 1);
     return true;
   }
 
-  // '=' ATTR_VALUE
-  private static boolean AttrWithValue_1_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "AttrWithValue_1_0")) return false;
+  // EQ ATTR_VALUE
+  private static boolean Attr_1_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "Attr_1_0")) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = consumeToken(b, "=");
-    r = r && consumeToken(b, ATTR_VALUE);
+    r = consumeTokens(b, 0, EQ, ATTR_VALUE);
     exit_section_(b, m, null, r);
     return r;
   }
 
   /* ********************************************************** */
-  // '<body>' Component '</body>'
+  // TAG_BODY_OPEN Component TAG_BODY_CLOSE
   public static boolean BodyTag(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "BodyTag")) return false;
-    boolean r;
-    Marker m = enter_section_(b, l, _NONE_, "<body tag>");
-    r = consumeToken(b, "<body>");
-    r = r && Component(b, l + 1);
-    r = r && consumeToken(b, "</body>");
-    exit_section_(b, l, m, BODY_TAG, r, false, null);
-    return r;
+    if (!nextTokenIs(b, TAG_BODY_OPEN)) return false;
+    boolean r, p;
+    Marker m = enter_section_(b, l, _NONE_, null);
+    r = consumeToken(b, TAG_BODY_OPEN);
+    p = r; // pin = 1
+    r = r && report_error_(b, Component(b, l + 1));
+    r = p && consumeToken(b, TAG_BODY_CLOSE) && r;
+    exit_section_(b, l, m, BODY_TAG, r, p, null);
+    return r || p;
   }
 
   /* ********************************************************** */
-  // EL_LEFT NAME Attr* (EL_CLOSE_RIGHT | EL_RIGHT (HtmlContent | Component*) EL_CLOSE_LEFT NAME EL_RIGHT)
+  // EL_LEFT ELEM_NAME Attr* (EL_CLOSE_RIGHT | EL_RIGHT (HtmlContent | Component*) EL_CLOSE_LEFT ELEM_NAME EL_RIGHT)
   public static boolean Component(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "Component")) return false;
     if (!nextTokenIs(b, EL_LEFT)) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = consumeTokens(b, 0, EL_LEFT, NAME);
-    r = r && Component_2(b, l + 1);
-    r = r && Component_3(b, l + 1);
-    exit_section_(b, m, COMPONENT, r);
-    return r;
+    boolean r, p;
+    Marker m = enter_section_(b, l, _NONE_, null);
+    r = consumeTokens(b, 2, EL_LEFT, ELEM_NAME);
+    p = r; // pin = 2
+    r = r && report_error_(b, Component_2(b, l + 1));
+    r = p && Component_3(b, l + 1) && r;
+    exit_section_(b, l, m, COMPONENT, r, p, null);
+    return r || p;
   }
 
   // Attr*
@@ -149,7 +126,7 @@ public class VaadinDesignParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  // EL_CLOSE_RIGHT | EL_RIGHT (HtmlContent | Component*) EL_CLOSE_LEFT NAME EL_RIGHT
+  // EL_CLOSE_RIGHT | EL_RIGHT (HtmlContent | Component*) EL_CLOSE_LEFT ELEM_NAME EL_RIGHT
   private static boolean Component_3(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "Component_3")) return false;
     boolean r;
@@ -160,14 +137,14 @@ public class VaadinDesignParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // EL_RIGHT (HtmlContent | Component*) EL_CLOSE_LEFT NAME EL_RIGHT
+  // EL_RIGHT (HtmlContent | Component*) EL_CLOSE_LEFT ELEM_NAME EL_RIGHT
   private static boolean Component_3_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "Component_3_1")) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = consumeToken(b, EL_RIGHT);
     r = r && Component_3_1_1(b, l + 1);
-    r = r && consumeTokens(b, 0, EL_CLOSE_LEFT, NAME, EL_RIGHT);
+    r = r && consumeTokens(b, 0, EL_CLOSE_LEFT, ELEM_NAME, EL_RIGHT);
     exit_section_(b, m, null, r);
     return r;
   }
@@ -196,38 +173,40 @@ public class VaadinDesignParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // '<!DOCTYPE html>'
-  public static boolean Doctype(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "Doctype")) return false;
-    boolean r;
-    Marker m = enter_section_(b, l, _NONE_, "<doctype>");
-    r = consumeToken(b, "<!DOCTYPE html>");
-    exit_section_(b, l, m, DOCTYPE, r, false, null);
-    return r;
-  }
-
-  /* ********************************************************** */
-  // Doctype? (HtmlTag | Component)
+  // DOCTYPE_DECL? COMMENT* (HtmlTag | Component)
   static boolean Document(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "Document")) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = Document_0(b, l + 1);
     r = r && Document_1(b, l + 1);
+    r = r && Document_2(b, l + 1);
     exit_section_(b, m, null, r);
     return r;
   }
 
-  // Doctype?
+  // DOCTYPE_DECL?
   private static boolean Document_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "Document_0")) return false;
-    Doctype(b, l + 1);
+    consumeToken(b, DOCTYPE_DECL);
+    return true;
+  }
+
+  // COMMENT*
+  private static boolean Document_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "Document_1")) return false;
+    int c = current_position_(b);
+    while (true) {
+      if (!consumeToken(b, COMMENT)) break;
+      if (!empty_element_parsed_guard_(b, "Document_1", c)) break;
+      c = current_position_(b);
+    }
     return true;
   }
 
   // HtmlTag | Component
-  private static boolean Document_1(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "Document_1")) return false;
+  private static boolean Document_2(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "Document_2")) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = HtmlTag(b, l + 1);
@@ -237,16 +216,18 @@ public class VaadinDesignParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // '<head>' MetaTag* '</head>'
+  // TAG_HEAD_OPEN MetaTag* TAG_HEAD_CLOSE
   public static boolean HeadTag(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "HeadTag")) return false;
-    boolean r;
-    Marker m = enter_section_(b, l, _NONE_, "<head tag>");
-    r = consumeToken(b, "<head>");
-    r = r && HeadTag_1(b, l + 1);
-    r = r && consumeToken(b, "</head>");
-    exit_section_(b, l, m, HEAD_TAG, r, false, null);
-    return r;
+    if (!nextTokenIs(b, TAG_HEAD_OPEN)) return false;
+    boolean r, p;
+    Marker m = enter_section_(b, l, _NONE_, null);
+    r = consumeToken(b, TAG_HEAD_OPEN);
+    p = r; // pin = 1
+    r = r && report_error_(b, HeadTag_1(b, l + 1));
+    r = p && consumeToken(b, TAG_HEAD_CLOSE) && r;
+    exit_section_(b, l, m, HEAD_TAG, r, p, null);
+    return r || p;
   }
 
   // MetaTag*
@@ -262,7 +243,7 @@ public class VaadinDesignParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // (EL_LEFT NAME EL_CLOSE_RIGHT) | (EL_LEFT NAME EL_RIGHT HtmlContent* EL_CLOSE_LEFT NAME EL_RIGHT)
+  // (EL_LEFT ELEM_NAME EL_CLOSE_RIGHT) | (EL_LEFT ELEM_NAME EL_RIGHT HtmlContent* EL_CLOSE_LEFT ELEM_NAME EL_RIGHT)
   public static boolean HtmlContent(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "HtmlContent")) return false;
     if (!nextTokenIs(b, EL_LEFT)) return false;
@@ -274,24 +255,24 @@ public class VaadinDesignParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // EL_LEFT NAME EL_CLOSE_RIGHT
+  // EL_LEFT ELEM_NAME EL_CLOSE_RIGHT
   private static boolean HtmlContent_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "HtmlContent_0")) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = consumeTokens(b, 0, EL_LEFT, NAME, EL_CLOSE_RIGHT);
+    r = consumeTokens(b, 0, EL_LEFT, ELEM_NAME, EL_CLOSE_RIGHT);
     exit_section_(b, m, null, r);
     return r;
   }
 
-  // EL_LEFT NAME EL_RIGHT HtmlContent* EL_CLOSE_LEFT NAME EL_RIGHT
+  // EL_LEFT ELEM_NAME EL_RIGHT HtmlContent* EL_CLOSE_LEFT ELEM_NAME EL_RIGHT
   private static boolean HtmlContent_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "HtmlContent_1")) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = consumeTokens(b, 0, EL_LEFT, NAME, EL_RIGHT);
+    r = consumeTokens(b, 0, EL_LEFT, ELEM_NAME, EL_RIGHT);
     r = r && HtmlContent_1_3(b, l + 1);
-    r = r && consumeTokens(b, 0, EL_CLOSE_LEFT, NAME, EL_RIGHT);
+    r = r && consumeTokens(b, 0, EL_CLOSE_LEFT, ELEM_NAME, EL_RIGHT);
     exit_section_(b, m, null, r);
     return r;
   }
@@ -309,19 +290,21 @@ public class VaadinDesignParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // '<html' Attr* EL_RIGHT HeadTag? BodyTag '</html>'
+  // TAG_HTML_OPEN Attr* EL_RIGHT HeadTag? BodyTag TAG_HTML_CLOSE
   public static boolean HtmlTag(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "HtmlTag")) return false;
-    boolean r;
-    Marker m = enter_section_(b, l, _NONE_, "<html tag>");
-    r = consumeToken(b, "<html");
-    r = r && HtmlTag_1(b, l + 1);
-    r = r && consumeToken(b, EL_RIGHT);
-    r = r && HtmlTag_3(b, l + 1);
-    r = r && BodyTag(b, l + 1);
-    r = r && consumeToken(b, "</html>");
-    exit_section_(b, l, m, HTML_TAG, r, false, null);
-    return r;
+    if (!nextTokenIs(b, TAG_HTML_OPEN)) return false;
+    boolean r, p;
+    Marker m = enter_section_(b, l, _NONE_, null);
+    r = consumeToken(b, TAG_HTML_OPEN);
+    p = r; // pin = 1
+    r = r && report_error_(b, HtmlTag_1(b, l + 1));
+    r = p && report_error_(b, consumeToken(b, EL_RIGHT)) && r;
+    r = p && report_error_(b, HtmlTag_3(b, l + 1)) && r;
+    r = p && report_error_(b, BodyTag(b, l + 1)) && r;
+    r = p && consumeToken(b, TAG_HTML_CLOSE) && r;
+    exit_section_(b, l, m, HTML_TAG, r, p, null);
+    return r || p;
   }
 
   // Attr*
@@ -344,38 +327,33 @@ public class VaadinDesignParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // '_id=' ATTR_VALUE
-  public static boolean LocalIdAttr(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "LocalIdAttr")) return false;
-    boolean r;
-    Marker m = enter_section_(b, l, _NONE_, "<local id attr>");
-    r = consumeToken(b, "_id=");
-    r = r && consumeToken(b, ATTR_VALUE);
-    exit_section_(b, l, m, LOCAL_ID_ATTR, r, false, null);
-    return r;
-  }
-
-  /* ********************************************************** */
-  // '<meta' EL_CLOSE_RIGHT
+  // TAG_META_OPEN Attr+ EL_CLOSE_RIGHT
   public static boolean MetaTag(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "MetaTag")) return false;
-    boolean r;
-    Marker m = enter_section_(b, l, _NONE_, "<meta tag>");
-    r = consumeToken(b, "<meta");
-    r = r && consumeToken(b, EL_CLOSE_RIGHT);
-    exit_section_(b, l, m, META_TAG, r, false, null);
-    return r;
+    if (!nextTokenIs(b, TAG_META_OPEN)) return false;
+    boolean r, p;
+    Marker m = enter_section_(b, l, _NONE_, null);
+    r = consumeToken(b, TAG_META_OPEN);
+    p = r; // pin = 1
+    r = r && report_error_(b, MetaTag_1(b, l + 1));
+    r = p && consumeToken(b, EL_CLOSE_RIGHT) && r;
+    exit_section_(b, l, m, META_TAG, r, p, null);
+    return r || p;
   }
 
-  /* ********************************************************** */
-  // ':' AttrWithValue
-  public static boolean ParentAttr(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "ParentAttr")) return false;
+  // Attr+
+  private static boolean MetaTag_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "MetaTag_1")) return false;
     boolean r;
-    Marker m = enter_section_(b, l, _NONE_, "<parent attr>");
-    r = consumeToken(b, ":");
-    r = r && AttrWithValue(b, l + 1);
-    exit_section_(b, l, m, PARENT_ATTR, r, false, null);
+    Marker m = enter_section_(b);
+    r = Attr(b, l + 1);
+    int c = current_position_(b);
+    while (r) {
+      if (!Attr(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "MetaTag_1", c)) break;
+      c = current_position_(b);
+    }
+    exit_section_(b, m, null, r);
     return r;
   }
 

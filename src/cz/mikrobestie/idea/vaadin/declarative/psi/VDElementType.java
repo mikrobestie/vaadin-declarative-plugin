@@ -13,4 +13,9 @@ public class VDElementType extends IElementType {
     public VDElementType(@NotNull @NonNls String debugName) {
         super(debugName, VaadinDeclarativeLanguage.INSTANCE);
     }
+
+    @Override
+    public String toString() {
+        return "VDElementType." + super.toString();
+    }
 }

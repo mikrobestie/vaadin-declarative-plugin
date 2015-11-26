@@ -7,7 +7,7 @@ import com.intellij.psi.PsiElement;
 
 public interface VDBodyTag extends PsiElement {
 
-  @NotNull
+  @Nullable
   VDComponent getComponent();
 
 }

@@ -7,13 +7,4 @@ import com.intellij.psi.PsiElement;
 
 public interface VDAttr extends PsiElement {
 
-  @Nullable
-  VDAttrWithValue getAttrWithValue();
-
-  @Nullable
-  VDLocalIdAttr getLocalIdAttr();
-
-  @Nullable
-  VDParentAttr getParentAttr();
-
 }

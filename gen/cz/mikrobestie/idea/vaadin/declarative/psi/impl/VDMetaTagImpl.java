@@ -22,4 +22,10 @@ public class VDMetaTagImpl extends ASTWrapperPsiElement implements VDMetaTag {
     else super.accept(visitor);
   }
 
+  @Override
+  @NotNull
+  public List<VDAttr> getAttrList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, VDAttr.class);
+  }
+
 }
