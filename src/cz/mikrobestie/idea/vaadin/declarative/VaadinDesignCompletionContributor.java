@@ -6,12 +6,14 @@ import com.intellij.icons.AllIcons;
 import com.intellij.patterns.PlatformPatterns;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiMethod;
 import com.intellij.util.ProcessingContext;
 import cz.mikrobestie.idea.vaadin.declarative.icons.VaadinIcons;
 import cz.mikrobestie.idea.vaadin.declarative.psi.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -127,12 +129,35 @@ public class VaadinDesignCompletionContributor extends CompletionContributor {
                     }
                 } else if (element instanceof VDComponent) {
 
-                    // Local id
-                    result.addElement(LookupElementBuilder.create("_id")
-                            .withInsertHandler(new XmlAttributeInsertHandler())
-                            .appendTailText(" Binds design to field in java class", true)
-                            .withIcon(VaadinIcons.VAADIN_16));
+                    VDComponent component = (VDComponent) element;
+                    List<String> attrs = component.getAttrList().stream().map(a -> a.getFirstChild().getText()).collect(Collectors.toList());
+                    if (!attrs.contains("_id")) {
 
+                        // Local id
+                        result.addElement(LookupElementBuilder.create("_id")
+                                .withInsertHandler(new XmlAttributeInsertHandler())
+                                .appendTailText(" Binds design to field in java class", true)
+                                .withIcon(VaadinIcons.VAADIN_16));
+                    }
+                    Map<String, PsiMethod> setters = VaadinUtils.getClassUsableSetters(component.getProject(), component.getComponentClassName());
+                    for (Map.Entry<String, PsiMethod> entry : setters.entrySet()) {
+
+                        if (!attrs.contains(entry.getKey())) {
+
+                            // Basic setter mapping
+                            LookupElementBuilder builder = LookupElementBuilder.create(entry.getKey())
+                                    .appendTailText(" " + entry.getValue().getText(), true)
+                                    .withIcon(VaadinIcons.VAADIN_16);
+
+                            // Non-boolean will have value by default
+                            if (!"boolean".equals(entry.getValue().getParameterList().getParameters()[0].getType().getCanonicalText())) {
+                                builder = builder.withInsertHandler(new XmlAttributeInsertHandler());
+                            }
+
+                            // Local id
+                            result.addElement(builder);
+                        }
+                    }
                 }
             }
 

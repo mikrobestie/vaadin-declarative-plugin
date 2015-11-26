@@ -8,6 +8,7 @@ import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.searches.ClassInheritorsSearch;
 import com.intellij.util.Query;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -40,6 +41,21 @@ public class PluginUtils {
             return psiPackage.getClasses();
         }
         return new PsiClass[0];
+    }
+
+    public static List<PsiMethod> findClassSetters(Project project, String qualifiedName) {
+        GlobalSearchScope scope = GlobalSearchScope.allScope(project);
+        PsiClass aClass = JavaPsiFacade.getInstance(project).findClass(qualifiedName, scope);
+        if (aClass != null) {
+            List<PsiMethod> list = new ArrayList<>();
+            for (PsiMethod method : aClass.getAllMethods()) {
+                if (method.getName().startsWith("set") && method.getParameterList().getParametersCount() == 1) {
+                    list.add(method);
+                }
+            }
+            return list;
+        }
+        return Collections.emptyList();
     }
 
     /**
