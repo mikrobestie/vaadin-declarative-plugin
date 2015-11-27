@@ -20,6 +20,7 @@ import cz.mikrobestie.idea.vaadin.declarative.psi.VDTypes;
 %type IElementType
 %unicode
 
+COMMENT = "<!--" (.|\n])* "-->"
 WHITE_SPACE = [\ \t\f\r\n]
 ELEM_NAME = [a-z]+(-[a-z]+)*
 ATTR_NAME = [_:a-z]?[a-z-]*
@@ -29,7 +30,6 @@ EL_RIGHT = ">"
 EL_CLOSE_LEFT = "</"
 EL_CLOSE_RIGHT = "/>"
 EQ = "="
-COMMENT = "<!--" .+ ("-->")?
 
 /* Fixed tags */
 DOCTYPE_DECL = "<!DOCTYPE html>"
@@ -87,6 +87,10 @@ TAG_BODY_CLOSE = "</body>"
     {ATTR_VALUE}                    { return VDTypes.ATTR_VALUE; }
 
     {EQ}                            { return VDTypes.EQ; }
+
+    {EL_CLOSE_LEFT}                 { yybegin(YYINITIAL); return VDTypes.EL_CLOSE_LEFT; }
+
+    {EL_LEFT}                       { yybegin(YYINITIAL); return VDTypes.EL_RIGHT; }
 }
 
 [^]                                 { return TokenType.BAD_CHARACTER; }

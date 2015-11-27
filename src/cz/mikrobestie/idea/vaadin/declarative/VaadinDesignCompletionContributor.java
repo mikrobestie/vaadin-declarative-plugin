@@ -101,45 +101,50 @@ public class VaadinDesignCompletionContributor extends CompletionContributor {
         protected void addCompletions(@NotNull CompletionParameters parameters, ProcessingContext context, @NotNull CompletionResultSet result) {
 
             PsiElement attrName = parameters.getPosition();
-            PsiElement attr = attrName.getParent();
+            PsiElement element = attrName.getParent();
 
-            System.out.println("Attr name completion: " + attrName + " < " + attr);
+            System.out.println("Attr name completion: " + attrName + " < " + element);
 
-            // Real attribute
-            if (attr instanceof VDAttr) {
+            // Extract real parent
+            if (element instanceof VDAttr) {
+                element = element.getParent();
+            }
 
-                PsiElement element = attr.getParent();
-                if (element instanceof VDMetaTag) {
+            // Switch by containing element
+            if (element instanceof VDMetaTag) {
 
-                    List<String> attrs = ((VDMetaTag) element).getAttrList().stream().map(a -> a.getFirstChild().getText()).collect(Collectors.toList());
-                    if (!attrs.contains("name")) {
+                List<String> attrs = ((VDMetaTag) element).getAttrList().stream().map(a -> a.getFirstChild().getText()).collect(Collectors.toList());
+                if (!attrs.contains("name")) {
 
-                        // <meta name="package-mapping"
-                        result.addElement(LookupElementBuilder.create("name=\"package-mapping\"")
-                                .appendTailText(" The only meta element", true)
-                                .withIcon(VaadinIcons.VAADIN_16));
-                    }
-                    if (!attrs.contains("content")) {
+                    // <meta name="package-mapping"
+                    result.addElement(LookupElementBuilder.create("name=\"package-mapping\"")
+                            .appendTailText(" The only meta element", true)
+                            .withIcon(VaadinIcons.VAADIN_16));
+                }
+                if (!attrs.contains("content")) {
 
-                        // <meta content="x:a.b.c"
-                        result.addElement(LookupElementBuilder.create("content")
-                                .withInsertHandler(new XmlAttributeInsertHandler())
-                                .appendTailText(" Enables usage of custom components", true)
-                                .withIcon(VaadinIcons.VAADIN_16));
-                    }
-                } else if (element instanceof VDComponent) {
+                    // <meta content="x:a.b.c"
+                    result.addElement(LookupElementBuilder.create("content")
+                            .withInsertHandler(new XmlAttributeInsertHandler())
+                            .appendTailText(" Enables usage of custom components", true)
+                            .withIcon(VaadinIcons.VAADIN_16));
+                }
+            } else if (element instanceof VDComponent) {
 
-                    VDComponent component = (VDComponent) element;
-                    List<String> attrs = component.getAttrList().stream().map(a -> a.getFirstChild().getText()).collect(Collectors.toList());
-                    if (!attrs.contains("_id")) {
+                VDComponent component = (VDComponent) element;
+                List<String> attrs = component.getAttrList().stream().map(a -> a.getFirstChild().getText()).collect(Collectors.toList());
+                if (!attrs.contains("_id")) {
 
-                        // Local id
-                        result.addElement(LookupElementBuilder.create("_id")
-                                .withInsertHandler(new XmlAttributeInsertHandler())
-                                .appendTailText(" Binds design to field in java class", true)
-                                .withIcon(VaadinIcons.VAADIN_16));
-                    }
-                    Map<String, PsiMethod> setters = VaadinUtils.getClassUsableSetters(component.getProject(), component.getComponentClassName());
+                    // Local id
+                    result.addElement(LookupElementBuilder.create("_id")
+                            .withInsertHandler(new XmlAttributeInsertHandler())
+                            .appendTailText(" Binds design to field in java class", true)
+                            .withIcon(VaadinIcons.VAADIN_16));
+                }
+
+                String className = component.getComponentClassName();
+                if (className != null) {
+                    Map<String, PsiMethod> setters = VaadinUtils.getClassUsableSetters(component.getProject(), className);
                     for (Map.Entry<String, PsiMethod> entry : setters.entrySet()) {
 
                         if (!attrs.contains(entry.getKey())) {
@@ -160,7 +165,6 @@ public class VaadinDesignCompletionContributor extends CompletionContributor {
                     }
                 }
             }
-
         }
     }
 

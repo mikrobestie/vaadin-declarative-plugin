@@ -34,9 +34,9 @@ public class VDComponentImpl extends VDNamedElementImpl implements VDComponent {
   }
 
   @Override
-  @Nullable
-  public VDHtmlContent getHtmlContent() {
-    return findChildByClass(VDHtmlContent.class);
+  @NotNull
+  public List<VDHtmlContent> getHtmlContentList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, VDHtmlContent.class);
   }
 
 }

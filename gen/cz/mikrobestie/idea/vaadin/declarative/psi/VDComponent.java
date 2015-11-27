@@ -13,7 +13,14 @@ public interface VDComponent extends VDNamedElement {
   @NotNull
   List<VDComponent> getComponentList();
 
+  @NotNull
+  List<VDHtmlContent> getHtmlContentList();
+
+  String getName();
+
+  PsiElement setName(String name);
+
   @Nullable
-  VDHtmlContent getHtmlContent();
+  PsiElement getNameIdentifier();
 
 }

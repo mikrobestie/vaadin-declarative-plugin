@@ -20,10 +20,17 @@ HeadTag ::= TAG_HEAD_OPEN MetaTag* TAG_HEAD_CLOSE {pin = 1}
 MetaTag ::= TAG_META_OPEN Attr+ EL_CLOSE_RIGHT {pin = 1}
 BodyTag ::= TAG_BODY_OPEN Component TAG_BODY_CLOSE {pin = 1}
 HtmlContent ::= (EL_LEFT ELEM_NAME EL_CLOSE_RIGHT) | (EL_LEFT ELEM_NAME EL_RIGHT HtmlContent* EL_CLOSE_LEFT ELEM_NAME EL_RIGHT)
-Component ::= EL_LEFT ELEM_NAME Attr* (EL_CLOSE_RIGHT | EL_RIGHT (HtmlContent | Component*) EL_CLOSE_LEFT ELEM_NAME EL_RIGHT) {
-    pin         = 2
-    mixin       = "cz.mikrobestie.idea.vaadin.declarative.psi.impl.VDNamedElementImpl"
-    implements  = "cz.mikrobestie.idea.vaadin.declarative.psi.VDNamedElement"
-    methods     = [getKey getValue getName setName getNameIdentifier]
+
+Component ::= ComponentSelfClosing | ComponentPair {
+    mixin        = "cz.mikrobestie.idea.vaadin.declarative.psi.impl.VDNamedElementImpl"
+    implements   = "cz.mikrobestie.idea.vaadin.declarative.psi.VDNamedElement"
+    methods      = [getKey getValue getName setName getNameIdentifier]
 }
+
+private ComponentSelfClosing ::= EL_LEFT ELEM_NAME Attr* EL_CLOSE_RIGHT
+private ComponentPair ::= ComponentOpen (HtmlContent | Component)* ComponentClose {pin=1 recoverWhile="ComponentPairRecover"}
+private ComponentPairRecover ::= !(Component | TAG_BODY_CLOSE)
+private ComponentOpen ::= EL_LEFT ELEM_NAME Attr* EL_RIGHT
+private ComponentClose ::= EL_CLOSE_LEFT ELEM_NAME EL_RIGHT
+
 Attr ::= ATTR_NAME (EQ ATTR_VALUE)?

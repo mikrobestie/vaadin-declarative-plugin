@@ -10,6 +10,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Michal on 18.11.2015.
@@ -42,34 +44,38 @@ public class VaadinDesignFile extends PsiFileBase {
      *
      * @return Array of custom package definitions
      */
-    public PackageDefinition[] getPackages() {
+    public List<PackageDefinition> getPackages() {
+
+        List<PackageDefinition> packages = new ArrayList<>();
 
         VDHtmlTag html = PsiTreeUtil.getChildOfType(this, VDHtmlTag.class);
         if (html != null) {
             VDHeadTag head = PsiTreeUtil.getChildOfType(html, VDHeadTag.class);
             if (head != null) {
-                VDMetaTag[] metaTags = PsiTreeUtil.getChildrenOfType(head, VDMetaTag.class);
-                PackageDefinition[] definitions = new PackageDefinition[metaTags.length];
-                for (int i = 0; i < metaTags.length; i++) {
-                    VDMetaTag mt = metaTags[i];
-                    PackageDefinition def = new PackageDefinition();
-                    for (VDAttr attr : mt.getAttrList()) {
-                        if (attr.getFirstChild().getText().equals("content")) {
 
-                            String text1 = attr.getLastChild().getText();
-                            String text = text1.substring(1, text1.length() - 1);
-                            String[] split = text.split(":");
-                            def.setPrefix(split[0]);
-                            def.setPackageName(split[1]);
+                // Go through all meta tags
+                VDMetaTag[] metaTags = PsiTreeUtil.getChildrenOfType(head, VDMetaTag.class);
+                if (metaTags != null) {
+                    for (int i = 0; i < metaTags.length; i++) {
+                        VDMetaTag mt = metaTags[i];
+                        for (VDAttr attr : mt.getAttrList()) {
+                            if (attr.getFirstChild().getText().equals("content")) {
+                                String text1 = attr.getLastChild().getText();
+                                String text = text1.substring(1, text1.length() - 1);
+                                String[] split = text.split(":");
+                                if (split.length == 2) {
+                                    packages.add(new PackageDefinition(split[0], split[1]));
+                                }
+                            }
                         }
-                        definitions[i] = def;
                     }
-                    return definitions;
                 }
             }
         }
 
-        return new PackageDefinition[0];
+        // Add Vaadin package
+        packages.add(new PackageDefinition("v", "com.vaadin.ui"));
+        return packages;
     }
 
     /**
@@ -79,9 +85,11 @@ public class VaadinDesignFile extends PsiFileBase {
      * @return Package name
      */
     public PackageDefinition getPackageByPrefix(String prefix) {
-        for (PackageDefinition pkg : getPackages()) {
-            if (prefix.equals(pkg.getPrefix())) {
-                return pkg;
+        if (prefix != null) {
+            for (PackageDefinition pkg : getPackages()) {
+                if (prefix.equals(pkg.getPrefix())) {
+                    return pkg;
+                }
             }
         }
         return null;
@@ -95,6 +103,14 @@ public class VaadinDesignFile extends PsiFileBase {
 
         private String prefix;
         private String packageName;
+
+        public PackageDefinition() {
+        }
+
+        public PackageDefinition(String prefix, String packageName) {
+            this.prefix = prefix;
+            this.packageName = packageName;
+        }
 
         public String getPrefix() {
             return prefix;
