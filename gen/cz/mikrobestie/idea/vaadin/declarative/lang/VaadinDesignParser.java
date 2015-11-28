@@ -35,9 +35,6 @@ public class VaadinDesignParser implements PsiParser, LightPsiParser {
     else if (t == HEAD_TAG) {
       r = HeadTag(b, 0);
     }
-    else if (t == HTML_CONTENT) {
-      r = HtmlContent(b, 0);
-    }
     else if (t == HTML_TAG) {
       r = HtmlTag(b, 0);
     }
@@ -151,40 +148,40 @@ public class VaadinDesignParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // ComponentOpen (HtmlContent | Component)* ComponentClose
-  static boolean ComponentPair(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "ComponentPair")) return false;
-    boolean r, p;
-    Marker m = enter_section_(b, l, _NONE_, null);
-    r = ComponentOpen(b, l + 1);
-    p = r; // pin = 1
-    r = r && report_error_(b, ComponentPair_1(b, l + 1));
-    r = p && ComponentClose(b, l + 1) && r;
-    exit_section_(b, l, m, null, r, p, ComponentPairRecover_parser_);
-    return r || p;
+  // !EL_LEFT
+  static boolean ComponentOpenRecover(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "ComponentOpenRecover")) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _NOT_, null);
+    r = !consumeToken(b, EL_LEFT);
+    exit_section_(b, l, m, null, r, false, null);
+    return r;
   }
 
-  // (HtmlContent | Component)*
+  /* ********************************************************** */
+  // ComponentOpen Component* ComponentClose
+  static boolean ComponentPair(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "ComponentPair")) return false;
+    if (!nextTokenIs(b, EL_LEFT)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = ComponentOpen(b, l + 1);
+    r = r && ComponentPair_1(b, l + 1);
+    r = r && ComponentClose(b, l + 1);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // Component*
   private static boolean ComponentPair_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "ComponentPair_1")) return false;
     int c = current_position_(b);
     while (true) {
-      if (!ComponentPair_1_0(b, l + 1)) break;
+      if (!Component(b, l + 1)) break;
       if (!empty_element_parsed_guard_(b, "ComponentPair_1", c)) break;
       c = current_position_(b);
     }
     return true;
-  }
-
-  // HtmlContent | Component
-  private static boolean ComponentPair_1_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "ComponentPair_1_0")) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = HtmlContent(b, l + 1);
-    if (!r) r = Component(b, l + 1);
-    exit_section_(b, m, null, r);
-    return r;
   }
 
   /* ********************************************************** */
@@ -306,53 +303,6 @@ public class VaadinDesignParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // (EL_LEFT ELEM_NAME EL_CLOSE_RIGHT) | (EL_LEFT ELEM_NAME EL_RIGHT HtmlContent* EL_CLOSE_LEFT ELEM_NAME EL_RIGHT)
-  public static boolean HtmlContent(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "HtmlContent")) return false;
-    if (!nextTokenIs(b, EL_LEFT)) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = HtmlContent_0(b, l + 1);
-    if (!r) r = HtmlContent_1(b, l + 1);
-    exit_section_(b, m, HTML_CONTENT, r);
-    return r;
-  }
-
-  // EL_LEFT ELEM_NAME EL_CLOSE_RIGHT
-  private static boolean HtmlContent_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "HtmlContent_0")) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = consumeTokens(b, 0, EL_LEFT, ELEM_NAME, EL_CLOSE_RIGHT);
-    exit_section_(b, m, null, r);
-    return r;
-  }
-
-  // EL_LEFT ELEM_NAME EL_RIGHT HtmlContent* EL_CLOSE_LEFT ELEM_NAME EL_RIGHT
-  private static boolean HtmlContent_1(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "HtmlContent_1")) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = consumeTokens(b, 0, EL_LEFT, ELEM_NAME, EL_RIGHT);
-    r = r && HtmlContent_1_3(b, l + 1);
-    r = r && consumeTokens(b, 0, EL_CLOSE_LEFT, ELEM_NAME, EL_RIGHT);
-    exit_section_(b, m, null, r);
-    return r;
-  }
-
-  // HtmlContent*
-  private static boolean HtmlContent_1_3(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "HtmlContent_1_3")) return false;
-    int c = current_position_(b);
-    while (true) {
-      if (!HtmlContent(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "HtmlContent_1_3", c)) break;
-      c = current_position_(b);
-    }
-    return true;
-  }
-
-  /* ********************************************************** */
   // TAG_HTML_OPEN Attr* EL_RIGHT HeadTag? BodyTag TAG_HTML_CLOSE
   public static boolean HtmlTag(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "HtmlTag")) return false;
@@ -420,9 +370,4 @@ public class VaadinDesignParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  final static Parser ComponentPairRecover_parser_ = new Parser() {
-    public boolean parse(PsiBuilder b, int l) {
-      return ComponentPairRecover(b, l + 1);
-    }
-  };
 }

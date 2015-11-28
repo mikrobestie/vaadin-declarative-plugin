@@ -8,9 +8,7 @@ import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.searches.ClassInheritorsSearch;
 import com.intellij.util.Query;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -41,6 +39,18 @@ public class PluginUtils {
             return psiPackage.getClasses();
         }
         return new PsiClass[0];
+    }
+
+    /**
+     * Tries to find class by given qualified name (anywhere in the project or dependencies). Returns null if
+     * not found.
+     *
+     * @param project Project
+     * @param className Class name
+     * @return Class
+     */
+    public static PsiClass findClass(Project project, String className) {
+        return JavaPsiFacade.getInstance(project).findClass(className, GlobalSearchScope.allScope(project));
     }
 
     public static List<PsiMethod> findClassSetters(Project project, String qualifiedName) {
@@ -81,5 +91,26 @@ public class PluginUtils {
                     .collect(Collectors.toList());
         }
         return Collections.EMPTY_LIST;
+    }
+
+    /**
+     * Finds setter of the class.
+     *
+     * @param project Project
+     * @param className Class name
+     * @param setterName Setter name
+     * @return Method
+     */
+    public static PsiMethod findClassSetter(Project project, String className, String setterName) {
+
+        List<PsiMethod> setters = PluginUtils.findClassSetters(project, className);
+        if (!setters.isEmpty()) {
+            for (PsiMethod setter : setters) {
+                if (setter.getName().equals(setterName)) {
+                    return setter;
+                }
+            }
+        }
+        return null;
     }
 }

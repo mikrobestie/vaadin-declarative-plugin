@@ -6,6 +6,7 @@ import com.intellij.icons.AllIcons;
 import com.intellij.patterns.PlatformPatterns;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiField;
 import com.intellij.psi.PsiMethod;
 import com.intellij.util.ProcessingContext;
 import cz.mikrobestie.idea.vaadin.declarative.icons.VaadinIcons;
@@ -187,17 +188,53 @@ public class VaadinDesignCompletionContributor extends CompletionContributor {
         @Override
         protected void addCompletions(@NotNull CompletionParameters parameters, ProcessingContext context, @NotNull CompletionResultSet result) {
 
-            PsiElement attrName = parameters.getPosition();
-            PsiElement attr = attrName.getParent();
+            PsiElement attrValue = parameters.getPosition();
+            PsiElement attr = attrValue.getParent();
 
-            System.out.println("Attr value completion: " + attrName + " < " + attr);
+            System.out.println("Attr value completion: " + attr + " -> " + attrValue);
 
             // Real attribute
             if (attr instanceof VDAttr) {
 
+                VDAttr atr = (VDAttr) attr;
                 PsiElement element = attr.getParent();
                 if (element instanceof VDMetaTag) {
 
+                } else if (element instanceof VDComponent) {
+
+                    String name = attr.getFirstChild().getText();
+                    String className = ((VDComponent) element).getComponentClassName();
+                    if ("_id".equals(name)) {
+
+                    }
+
+                    // Find by type
+                    String setterName = VaadinUtils.capitalizeSetter(name);
+                    PsiMethod setter = PluginUtils.findClassSetter(element.getProject(), className, setterName);
+                    if (setter != null) {
+
+                        switch (setter.getParameterList().getParameters()[0].getType().getCanonicalText()) {
+
+                            case "com.vaadin.server.Resource":
+
+                                // FontAwesome autocomplete
+                                PsiClass faClass = PluginUtils.findClass(element.getProject(), "com.vaadin.server.FontAwesome");
+                                PsiField[] allFields = faClass.getAllFields();
+                                for (PsiField icon : allFields) {
+                                    LookupElementBuilder builder = LookupElementBuilder.create("font://" + icon.getName())
+                                            .withIcon(VaadinIcons.VAADIN_16);
+                                    result.addElement(builder);
+                                }
+                                break;
+
+                            case "boolean":
+                            case "java.lang.Boolean":
+                                result.addElement(LookupElementBuilder.create("true"));
+                                result.addElement(LookupElementBuilder.create("false"));
+                                break;
+
+                        }
+                    }
                 }
             }
         }

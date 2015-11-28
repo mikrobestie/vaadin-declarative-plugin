@@ -23,10 +23,6 @@ public class VDVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
-  public void visitHtmlContent(@NotNull VDHtmlContent o) {
-    visitPsiElement(o);
-  }
-
   public void visitHtmlTag(@NotNull VDHtmlTag o) {
     visitPsiElement(o);
   }

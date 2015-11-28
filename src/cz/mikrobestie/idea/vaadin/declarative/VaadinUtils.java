@@ -25,13 +25,29 @@ public class VaadinUtils {
         return prefix + "-" + decapitalize(psiClass.getName());
     }
 
-    public static String getDesignClassName(String designNameWithoutPrefix) {
+    /**
+     * Turns some-class-name string into SomeClassName.
+     *
+     * @param designName Name in design
+     * @return Class name
+     */
+    public static String capitalizeClass(String designName) {
 
         String result = "";
-        for (String part : designNameWithoutPrefix.split("-")) {
+        for (String part : designName.split("-")) {
             result += part.substring(0, 1).toUpperCase() + part.substring(1);
         }
         return result;
+    }
+
+    /**
+     * Turns some-setter-name string into setSomeSetterName.
+     *
+     * @param designName Name in design
+     * @return Class name
+     */
+    public static String capitalizeSetter(String designName) {
+        return "set" + capitalizeClass(designName);
     }
 
     public static Map<String, PsiMethod> getClassUsableSetters(Project project, String qualifiedName) {

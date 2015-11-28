@@ -12,7 +12,6 @@ public interface VDTypes {
   IElementType BODY_TAG = new VDElementType("BODY_TAG");
   IElementType COMPONENT = new VDElementType("COMPONENT");
   IElementType HEAD_TAG = new VDElementType("HEAD_TAG");
-  IElementType HTML_CONTENT = new VDElementType("HTML_CONTENT");
   IElementType HTML_TAG = new VDElementType("HTML_TAG");
   IElementType META_TAG = new VDElementType("META_TAG");
 
@@ -48,9 +47,6 @@ public interface VDTypes {
       }
       else if (type == HEAD_TAG) {
         return new VDHeadTagImpl(node);
-      }
-      else if (type == HTML_CONTENT) {
-        return new VDHtmlContentImpl(node);
       }
       else if (type == HTML_TAG) {
         return new VDHtmlTagImpl(node);

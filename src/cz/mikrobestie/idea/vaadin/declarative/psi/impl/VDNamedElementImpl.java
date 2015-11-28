@@ -60,12 +60,14 @@ public abstract class VDNamedElementImpl extends ASTWrapperPsiElement implements
         String name = getName();
         if (name != null) {
             String[] parts = name.split("-", 2);
-            String prefix = parts[0];
-            if (prefix != null) {
-                VaadinDesignFile file = (VaadinDesignFile) getContainingFile();
-                VaadinDesignFile.PackageDefinition pkg = file.getPackageByPrefix(prefix);
-                if (pkg != null) {
-                    return pkg.getPackageName() + "." + VaadinUtils.getDesignClassName(parts[1]);
+            if (parts.length == 2) {
+                String prefix = parts[0];
+                if (prefix != null) {
+                    VaadinDesignFile file = (VaadinDesignFile) getContainingFile();
+                    VaadinDesignFile.PackageDefinition pkg = file.getPackageByPrefix(prefix);
+                    if (pkg != null) {
+                        return pkg.getPackageName() + "." + VaadinUtils.capitalizeClass(parts[1]);
+                    }
                 }
             }
         }

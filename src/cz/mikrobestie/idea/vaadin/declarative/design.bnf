@@ -19,7 +19,6 @@ HtmlTag ::= TAG_HTML_OPEN Attr* EL_RIGHT HeadTag? BodyTag TAG_HTML_CLOSE {pin=1}
 HeadTag ::= TAG_HEAD_OPEN MetaTag* TAG_HEAD_CLOSE {pin = 1}
 MetaTag ::= TAG_META_OPEN Attr+ EL_CLOSE_RIGHT {pin = 1}
 BodyTag ::= TAG_BODY_OPEN Component TAG_BODY_CLOSE {pin = 1}
-HtmlContent ::= (EL_LEFT ELEM_NAME EL_CLOSE_RIGHT) | (EL_LEFT ELEM_NAME EL_RIGHT HtmlContent* EL_CLOSE_LEFT ELEM_NAME EL_RIGHT)
 
 Component ::= ComponentSelfClosing | ComponentPair {
     mixin        = "cz.mikrobestie.idea.vaadin.declarative.psi.impl.VDNamedElementImpl"
@@ -28,9 +27,12 @@ Component ::= ComponentSelfClosing | ComponentPair {
 }
 
 private ComponentSelfClosing ::= EL_LEFT ELEM_NAME Attr* EL_CLOSE_RIGHT
-private ComponentPair ::= ComponentOpen (HtmlContent | Component)* ComponentClose {pin=1 recoverWhile="ComponentPairRecover"}
+private ComponentPair ::= ComponentOpen Component* ComponentClose {pin=1 recoverWhile="ComponentPairRecover"}
 private ComponentPairRecover ::= !(Component | TAG_BODY_CLOSE)
 private ComponentOpen ::= EL_LEFT ELEM_NAME Attr* EL_RIGHT
+private ComponentOpenRecover ::= !EL_LEFT
 private ComponentClose ::= EL_CLOSE_LEFT ELEM_NAME EL_RIGHT
 
-Attr ::= ATTR_NAME (EQ ATTR_VALUE)?
+Attr ::= ATTR_NAME (EQ ATTR_VALUE)? {
+    mixin       = ""
+}
