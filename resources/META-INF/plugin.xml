@@ -34,6 +34,7 @@
         <annotator language="Vaadin declarative" implementationClass="cz.mikrobestie.idea.vaadin.declarative.VDAnnotator"/>
 
         <psi.referenceContributor implementation="cz.mikrobestie.idea.vaadin.declarative.ref.VDReferenceContributor"/>
+        <lang.formatter language="Vaadin declarative" implementationClass="cz.mikrobestie.idea.vaadin.declarative.formatting.VDFormattingModelBuilder"/>
 
     </extensions>
 

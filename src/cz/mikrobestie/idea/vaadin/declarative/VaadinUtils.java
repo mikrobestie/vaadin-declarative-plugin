@@ -58,7 +58,7 @@ public class VaadinUtils {
             Map<String, PsiMethod> map = new HashMap<>();
             for (PsiMethod setter : setters) {
                 PsiParameter psiParameter = setter.getParameterList().getParameters()[0];
-                String canonicalText = psiParameter.getTypeElement().getType().getCanonicalText();
+                String canonicalText = PluginUtils.isEnum(psiParameter.getType()) ? "java.lang.Enum" : psiParameter.getType().getCanonicalText();
                 switch (canonicalText) {
 
                     case "java.lang.String":
@@ -83,6 +83,8 @@ public class VaadinUtils {
                     case "double":
 
                     case "com.vaadin.server.Resource":
+
+                    case "java.lang.Enum":
 
                         map.put(decapitalize(setter.getName().substring(3)), setter);
                         break;

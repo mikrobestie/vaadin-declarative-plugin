@@ -97,16 +97,64 @@ public class VaadinDesignParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // ComponentSelfClosing | ComponentPair
+  // EL_LEFT ELEM_NAME Attr* (EL_CLOSE_RIGHT | EL_RIGHT Component* ComponentClose)
   public static boolean Component(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "Component")) return false;
     if (!nextTokenIs(b, EL_LEFT)) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = ComponentSelfClosing(b, l + 1);
-    if (!r) r = ComponentPair(b, l + 1);
+    r = consumeTokens(b, 0, EL_LEFT, ELEM_NAME);
+    r = r && Component_2(b, l + 1);
+    r = r && Component_3(b, l + 1);
     exit_section_(b, m, COMPONENT, r);
     return r;
+  }
+
+  // Attr*
+  private static boolean Component_2(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "Component_2")) return false;
+    int c = current_position_(b);
+    while (true) {
+      if (!Attr(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "Component_2", c)) break;
+      c = current_position_(b);
+    }
+    return true;
+  }
+
+  // EL_CLOSE_RIGHT | EL_RIGHT Component* ComponentClose
+  private static boolean Component_3(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "Component_3")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, EL_CLOSE_RIGHT);
+    if (!r) r = Component_3_1(b, l + 1);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // EL_RIGHT Component* ComponentClose
+  private static boolean Component_3_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "Component_3_1")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, EL_RIGHT);
+    r = r && Component_3_1_1(b, l + 1);
+    r = r && ComponentClose(b, l + 1);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // Component*
+  private static boolean Component_3_1_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "Component_3_1_1")) return false;
+    int c = current_position_(b);
+    while (true) {
+      if (!Component(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "Component_3_1_1", c)) break;
+      c = current_position_(b);
+    }
+    return true;
   }
 
   /* ********************************************************** */
@@ -119,117 +167,6 @@ public class VaadinDesignParser implements PsiParser, LightPsiParser {
     r = consumeTokens(b, 0, EL_CLOSE_LEFT, ELEM_NAME, EL_RIGHT);
     exit_section_(b, m, null, r);
     return r;
-  }
-
-  /* ********************************************************** */
-  // EL_LEFT ELEM_NAME Attr* EL_RIGHT
-  static boolean ComponentOpen(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "ComponentOpen")) return false;
-    if (!nextTokenIs(b, EL_LEFT)) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = consumeTokens(b, 0, EL_LEFT, ELEM_NAME);
-    r = r && ComponentOpen_2(b, l + 1);
-    r = r && consumeToken(b, EL_RIGHT);
-    exit_section_(b, m, null, r);
-    return r;
-  }
-
-  // Attr*
-  private static boolean ComponentOpen_2(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "ComponentOpen_2")) return false;
-    int c = current_position_(b);
-    while (true) {
-      if (!Attr(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "ComponentOpen_2", c)) break;
-      c = current_position_(b);
-    }
-    return true;
-  }
-
-  /* ********************************************************** */
-  // !EL_LEFT
-  static boolean ComponentOpenRecover(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "ComponentOpenRecover")) return false;
-    boolean r;
-    Marker m = enter_section_(b, l, _NOT_, null);
-    r = !consumeToken(b, EL_LEFT);
-    exit_section_(b, l, m, null, r, false, null);
-    return r;
-  }
-
-  /* ********************************************************** */
-  // ComponentOpen Component* ComponentClose
-  static boolean ComponentPair(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "ComponentPair")) return false;
-    if (!nextTokenIs(b, EL_LEFT)) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = ComponentOpen(b, l + 1);
-    r = r && ComponentPair_1(b, l + 1);
-    r = r && ComponentClose(b, l + 1);
-    exit_section_(b, m, null, r);
-    return r;
-  }
-
-  // Component*
-  private static boolean ComponentPair_1(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "ComponentPair_1")) return false;
-    int c = current_position_(b);
-    while (true) {
-      if (!Component(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "ComponentPair_1", c)) break;
-      c = current_position_(b);
-    }
-    return true;
-  }
-
-  /* ********************************************************** */
-  // !(Component | TAG_BODY_CLOSE)
-  static boolean ComponentPairRecover(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "ComponentPairRecover")) return false;
-    boolean r;
-    Marker m = enter_section_(b, l, _NOT_, null);
-    r = !ComponentPairRecover_0(b, l + 1);
-    exit_section_(b, l, m, null, r, false, null);
-    return r;
-  }
-
-  // Component | TAG_BODY_CLOSE
-  private static boolean ComponentPairRecover_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "ComponentPairRecover_0")) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = Component(b, l + 1);
-    if (!r) r = consumeToken(b, TAG_BODY_CLOSE);
-    exit_section_(b, m, null, r);
-    return r;
-  }
-
-  /* ********************************************************** */
-  // EL_LEFT ELEM_NAME Attr* EL_CLOSE_RIGHT
-  static boolean ComponentSelfClosing(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "ComponentSelfClosing")) return false;
-    if (!nextTokenIs(b, EL_LEFT)) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = consumeTokens(b, 0, EL_LEFT, ELEM_NAME);
-    r = r && ComponentSelfClosing_2(b, l + 1);
-    r = r && consumeToken(b, EL_CLOSE_RIGHT);
-    exit_section_(b, m, null, r);
-    return r;
-  }
-
-  // Attr*
-  private static boolean ComponentSelfClosing_2(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "ComponentSelfClosing_2")) return false;
-    int c = current_position_(b);
-    while (true) {
-      if (!Attr(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "ComponentSelfClosing_2", c)) break;
-      c = current_position_(b);
-    }
-    return true;
   }
 
   /* ********************************************************** */

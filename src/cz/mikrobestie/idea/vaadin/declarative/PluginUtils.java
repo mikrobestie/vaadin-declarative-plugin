@@ -8,7 +8,9 @@ import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.searches.ClassInheritorsSearch;
 import com.intellij.util.Query;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -112,5 +114,10 @@ public class PluginUtils {
             }
         }
         return null;
+    }
+
+    public static boolean isEnum(PsiType type) {
+        return type instanceof PsiClassType
+                && (((PsiClassType) type).resolve()).isEnum();
     }
 }

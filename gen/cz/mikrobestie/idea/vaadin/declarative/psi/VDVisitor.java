@@ -8,7 +8,7 @@ import com.intellij.psi.PsiElement;
 public class VDVisitor extends PsiElementVisitor {
 
   public void visitAttr(@NotNull VDAttr o) {
-    visitPsiElement(o);
+    visitAttrHelper(o);
   }
 
   public void visitBodyTag(@NotNull VDBodyTag o) {
@@ -28,6 +28,10 @@ public class VDVisitor extends PsiElementVisitor {
   }
 
   public void visitMetaTag(@NotNull VDMetaTag o) {
+    visitPsiElement(o);
+  }
+
+  public void visitAttrHelper(@NotNull VDAttrHelper o) {
     visitPsiElement(o);
   }
 

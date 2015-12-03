@@ -4,11 +4,9 @@ import com.intellij.codeInsight.completion.*;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.icons.AllIcons;
 import com.intellij.patterns.PlatformPatterns;
-import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiField;
-import com.intellij.psi.PsiMethod;
+import com.intellij.psi.*;
 import com.intellij.util.ProcessingContext;
+import cz.mikrobestie.idea.vaadin.declarative.icons.FontAwesomeIcon;
 import cz.mikrobestie.idea.vaadin.declarative.icons.VaadinIcons;
 import cz.mikrobestie.idea.vaadin.declarative.psi.*;
 import org.jetbrains.annotations.NotNull;
@@ -106,6 +104,12 @@ public class VaadinDesignCompletionContributor extends CompletionContributor {
 
             System.out.println("Attr name completion: " + attrName + " < " + element);
 
+            // "" completion
+            if (attrName.getText().endsWith("=")) {
+                result.addElement(LookupElementBuilder.create("\"\""));
+                return;
+            }
+
             // Extract real parent
             if (element instanceof VDAttr) {
                 element = element.getParent();
@@ -114,7 +118,7 @@ public class VaadinDesignCompletionContributor extends CompletionContributor {
             // Switch by containing element
             if (element instanceof VDMetaTag) {
 
-                List<String> attrs = ((VDMetaTag) element).getAttrList().stream().map(a -> a.getFirstChild().getText()).collect(Collectors.toList());
+                List<String> attrs = ((VDMetaTag) element).getAttrList().stream().map(VDAttrHelper::getName).collect(Collectors.toList());
                 if (!attrs.contains("name")) {
 
                     // <meta name="package-mapping"
@@ -133,7 +137,7 @@ public class VaadinDesignCompletionContributor extends CompletionContributor {
             } else if (element instanceof VDComponent) {
 
                 VDComponent component = (VDComponent) element;
-                List<String> attrs = component.getAttrList().stream().map(a -> a.getFirstChild().getText()).collect(Collectors.toList());
+                List<String> attrs = component.getAttrList().stream().map(VDAttrHelper::getName).collect(Collectors.toList());
                 if (!attrs.contains("_id")) {
 
                     // Local id
@@ -189,50 +193,75 @@ public class VaadinDesignCompletionContributor extends CompletionContributor {
         protected void addCompletions(@NotNull CompletionParameters parameters, ProcessingContext context, @NotNull CompletionResultSet result) {
 
             PsiElement attrValue = parameters.getPosition();
-            PsiElement attr = attrValue.getParent();
+            PsiElement parent = attrValue.getParent();
 
-            System.out.println("Attr value completion: " + attr + " -> " + attrValue);
+            System.out.println("Attr value completion: " + parent + " -> " + attrValue);
 
             // Real attribute
-            if (attr instanceof VDAttr) {
+            if (parent instanceof VDAttr) {
 
-                VDAttr atr = (VDAttr) attr;
-                PsiElement element = attr.getParent();
+                VDAttr attr = (VDAttr) parent;
+                PsiElement element = parent.getParent();
                 if (element instanceof VDMetaTag) {
 
-                } else if (element instanceof VDComponent) {
+                } else {
+                    if (element instanceof VDComponent) {
 
-                    String name = attr.getFirstChild().getText();
-                    String className = ((VDComponent) element).getComponentClassName();
-                    if ("_id".equals(name)) {
+                        String name = attr.getName();
+                        String className = ((VDComponent) element).getComponentClassName();
+                        if ("_id".equals(name)) {
 
-                    }
+                        }
 
-                    // Find by type
-                    String setterName = VaadinUtils.capitalizeSetter(name);
-                    PsiMethod setter = PluginUtils.findClassSetter(element.getProject(), className, setterName);
-                    if (setter != null) {
+                        // Find by type
+                        String setterName = VaadinUtils.capitalizeSetter(name);
+                        PsiMethod setter = PluginUtils.findClassSetter(element.getProject(), className, setterName);
+                        if (setter != null) {
 
-                        switch (setter.getParameterList().getParameters()[0].getType().getCanonicalText()) {
-
-                            case "com.vaadin.server.Resource":
-
-                                // FontAwesome autocomplete
-                                PsiClass faClass = PluginUtils.findClass(element.getProject(), "com.vaadin.server.FontAwesome");
-                                PsiField[] allFields = faClass.getAllFields();
-                                for (PsiField icon : allFields) {
-                                    LookupElementBuilder builder = LookupElementBuilder.create("font://" + icon.getName())
-                                            .withIcon(VaadinIcons.VAADIN_16);
-                                    result.addElement(builder);
+                            PsiType type = setter.getParameterList().getParameters()[0].getType();
+                            if (type instanceof PsiClassType) {
+                                PsiClass aClass = ((PsiClassType) type).resolve();
+                                if (aClass.isEnum()) {
+                                    for (PsiField field : aClass.getFields()) {
+                                        if (field instanceof PsiEnumConstant) {
+                                            result.addElement(LookupElementBuilder.create(field.getName()));
+                                        }
+                                    }
+                                    return;
                                 }
-                                break;
+                            }
 
-                            case "boolean":
-                            case "java.lang.Boolean":
-                                result.addElement(LookupElementBuilder.create("true"));
-                                result.addElement(LookupElementBuilder.create("false"));
-                                break;
+                            switch (type.getCanonicalText()) {
 
+                                case "com.vaadin.server.Resource":
+
+                                    // FontAwesome autocomplete
+                                    PsiClass faClass = PluginUtils.findClass(element.getProject(), "com.vaadin.server.FontAwesome");
+                                    PsiField[] allFields = faClass.getAllFields();
+                                    for (PsiField icon : allFields) {
+
+                                        String text = icon.getText();
+                                        if (text.contains("('")) {
+
+                                            String unicode = text.substring(text.length() - 6, text.length() - 2);
+                                            int codepoint = Integer.parseInt(unicode, 16);
+
+                                            LookupElementBuilder builder = LookupElementBuilder.create("font://" + icon.getName())
+                                                    .withIcon(new FontAwesomeIcon(codepoint, 14));
+                                            result.addElement(builder);
+                                        }
+                                        System.out.println(text);
+
+                                    }
+                                    break;
+
+                                case "boolean":
+                                case "java.lang.Boolean":
+                                    result.addElement(LookupElementBuilder.create("true"));
+                                    result.addElement(LookupElementBuilder.create("false"));
+                                    break;
+
+                            }
                         }
                     }
                 }

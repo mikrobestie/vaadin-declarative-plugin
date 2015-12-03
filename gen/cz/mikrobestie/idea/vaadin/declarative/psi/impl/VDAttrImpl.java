@@ -8,10 +8,9 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static cz.mikrobestie.idea.vaadin.declarative.psi.VDTypes.*;
-import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import cz.mikrobestie.idea.vaadin.declarative.psi.*;
 
-public class VDAttrImpl extends ASTWrapperPsiElement implements VDAttr {
+public class VDAttrImpl extends VDAttrHelperImpl implements VDAttr {
 
   public VDAttrImpl(ASTNode node) {
     super(node);
