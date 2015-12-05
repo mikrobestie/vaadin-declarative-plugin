@@ -14,17 +14,17 @@
   tokenTypeClass="cz.mikrobestie.idea.vaadin.declarative.psi.VDTokenType"
 }
 
-Document ::= DOCTYPE_DECL? COMMENT* (HtmlTag | Component)
-HtmlTag ::= TAG_HTML_OPEN Attr* EL_RIGHT HeadTag? BodyTag TAG_HTML_CLOSE {pin=1}
-HeadTag ::= TAG_HEAD_OPEN MetaTag* TAG_HEAD_CLOSE {pin = 1}
-MetaTag ::= TAG_META_OPEN Attr+ EL_CLOSE_RIGHT {pin = 1}
-BodyTag ::= TAG_BODY_OPEN Component TAG_BODY_CLOSE {pin = 1}
+Document ::= DOCTYPE_DECL? (HtmlTag | Component)
+HtmlTag ::= COMMENT* TAG_HTML_OPEN Attr* EL_RIGHT HeadTag? BodyTag TAG_HTML_CLOSE {pin=2}
+HeadTag ::= COMMENT* TAG_HEAD_OPEN (MetaTag | COMMENT)* TAG_HEAD_CLOSE {pin = 2}
+MetaTag ::= COMMENT* TAG_META_OPEN Attr+ EL_CLOSE_RIGHT {pin = 2}
+BodyTag ::= COMMENT* TAG_BODY_OPEN COMMENT* Component COMMENT* TAG_BODY_CLOSE {pin = 2}
 
 Component ::= EL_LEFT ELEM_NAME Attr* (EL_CLOSE_RIGHT | EL_RIGHT Component* ComponentClose) {
 //    pin             = 2
 //    recoverWhile    = "ComponentRecover"
-    mixin           = "cz.mikrobestie.idea.vaadin.declarative.psi.impl.VDNamedElementImpl"
-    implements      = "cz.mikrobestie.idea.vaadin.declarative.psi.VDNamedElement"
+    mixin           = "cz.mikrobestie.idea.vaadin.declarative.psi.impl.VDComponentHelperImpl"
+    implements      = "cz.mikrobestie.idea.vaadin.declarative.psi.VDComponentHelper"
     methods         = [getKey getValue getName setName getNameIdentifier]
 }
 //private ComponentRecover ::= !(EL_LEFT | TAG_BODY_CLOSE)

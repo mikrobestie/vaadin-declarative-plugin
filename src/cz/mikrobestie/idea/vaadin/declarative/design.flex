@@ -20,7 +20,6 @@ import cz.mikrobestie.idea.vaadin.declarative.psi.VDTypes;
 %type IElementType
 %unicode
 
-COMMENT = "<!--" (.|\n])* "-->"
 WHITE_SPACE = [\ \t\f\r\n]
 ELEM_NAME = [a-z]+(-[a-z]+)*
 ATTR_NAME = [_:a-z]?[a-z-]*
@@ -42,6 +41,7 @@ TAG_BODY_OPEN = "<body>"
 TAG_BODY_CLOSE = "</body>"
 
 %state IN_TAG
+%xstate IN_COMMENT
 
 %%
 
@@ -49,7 +49,7 @@ TAG_BODY_CLOSE = "</body>"
 
 <YYINITIAL> {
 
-    {COMMENT}                       { return VDTypes.COMMENT; }
+    "<!--"                          { yybegin(IN_COMMENT); }
 
     // Fixed element names
     {DOCTYPE_DECL}                  { return VDTypes.DOCTYPE_DECL; }
@@ -74,6 +74,17 @@ TAG_BODY_CLOSE = "</body>"
 
     // Last
     {ELEM_NAME}                     { yybegin(IN_TAG); return VDTypes.ELEM_NAME; }
+}
+
+<IN_COMMENT> {
+
+    "-->"                           { yybegin(YYINITIAL); return VDTypes.COMMENT; }
+
+    [^-\n]+                         { }
+
+    "-"                             { }
+
+    \n                              { }
 }
 
 <IN_TAG> {

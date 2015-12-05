@@ -1,5 +1,6 @@
 package cz.mikrobestie.idea.vaadin.declarative.psi;
 
+import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiNameIdentifierOwner;
 
 /**
@@ -9,5 +10,7 @@ public interface VDAttrHelper extends PsiNameIdentifierOwner {
 
     String getName();
 
+    VDComponent getComponent();
 
+    PsiMethod getSetter();
 }

@@ -4,6 +4,7 @@ import com.intellij.formatting.*;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.TokenType;
 import com.intellij.psi.formatter.common.AbstractBlock;
+import cz.mikrobestie.idea.vaadin.declarative.psi.VDTypes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -38,6 +39,9 @@ public class VDBlock extends AbstractBlock {
 
     @Override
     public Indent getIndent() {
+        if (myNode.getElementType() == VDTypes.COMPONENT) {
+            return Indent.getNormalIndent();
+        }
         return Indent.getNoneIndent();
     }
 

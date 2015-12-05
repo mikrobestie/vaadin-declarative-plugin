@@ -16,7 +16,7 @@ public class VDVisitor extends PsiElementVisitor {
   }
 
   public void visitComponent(@NotNull VDComponent o) {
-    visitNamedElement(o);
+    visitComponentHelper(o);
   }
 
   public void visitHeadTag(@NotNull VDHeadTag o) {
@@ -35,7 +35,7 @@ public class VDVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
-  public void visitNamedElement(@NotNull VDNamedElement o) {
+  public void visitComponentHelper(@NotNull VDComponentHelper o) {
     visitPsiElement(o);
   }
 

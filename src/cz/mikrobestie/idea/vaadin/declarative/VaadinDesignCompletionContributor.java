@@ -6,19 +6,45 @@ import com.intellij.icons.AllIcons;
 import com.intellij.patterns.PlatformPatterns;
 import com.intellij.psi.*;
 import com.intellij.util.ProcessingContext;
-import cz.mikrobestie.idea.vaadin.declarative.icons.FontAwesomeIcon;
+import com.intellij.util.containers.hash.LinkedHashMap;
 import cz.mikrobestie.idea.vaadin.declarative.icons.VaadinIcons;
 import cz.mikrobestie.idea.vaadin.declarative.psi.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
  * Created by Michal on 18.11.2015.
  */
 public class VaadinDesignCompletionContributor extends CompletionContributor {
+
+
+    private static Map<String, String> attrs = new LinkedHashMap<>();
+    private static Map<String, String> noValueAttrs = new LinkedHashMap<>();
+
+    static {
+        attrs.put("_id", "Design field binding");
+        attrs.put("locale", "Component locale");
+        attrs.put("error", "Component error");
+
+        noValueAttrs.put("width-auto", "Undefined width");
+        noValueAttrs.put("height-auto", "Undefined height");
+        noValueAttrs.put("width-full", "100% width");
+        noValueAttrs.put("height-full", "100% height");
+        noValueAttrs.put("size-auto", "Undefined size");
+        noValueAttrs.put("size-full", "100% by 100% size");
+    }
+
+    public static Map<String, String> getAttrs() {
+        return attrs;
+    }
+
+    public static Map<String, String> getNoValueAttrs() {
+        return noValueAttrs;
+    }
 
     public VaadinDesignCompletionContributor() {
 
@@ -137,34 +163,47 @@ public class VaadinDesignCompletionContributor extends CompletionContributor {
             } else if (element instanceof VDComponent) {
 
                 VDComponent component = (VDComponent) element;
-                List<String> attrs = component.getAttrList().stream().map(VDAttrHelper::getName).collect(Collectors.toList());
-                if (!attrs.contains("_id")) {
+                Set<String> attrNames = component.getAttrNames();
 
-                    // Local id
-                    result.addElement(LookupElementBuilder.create("_id")
-                            .withInsertHandler(new XmlAttributeInsertHandler())
-                            .appendTailText(" Binds design to field in java class", true)
-                            .withIcon(VaadinIcons.VAADIN_16));
+                // Default AbstractComponent attributes - with value
+                for (Map.Entry<String, String> entry : attrs.entrySet()) {
+                    if (!attrNames.contains(entry.getKey())) {
+                        result.addElement(LookupElementBuilder.create(entry.getKey())
+                                .withInsertHandler(new XmlAttributeInsertHandler())
+                                .withTypeText(entry.getValue())
+                                .withIcon(VaadinIcons.VAADIN_16));
+                    }
                 }
 
+                // Default AbstractComponent attributes - no value
+                for (Map.Entry<String, String> entry : noValueAttrs.entrySet()) {
+                    if (!attrNames.contains(entry.getKey())) {
+                        result.addElement(LookupElementBuilder.create(entry.getKey())
+                                .withTypeText(entry.getValue())
+                                .withIcon(VaadinIcons.VAADIN_16));
+                    }
+                }
+
+                // Setter attribute mapping
                 String className = component.getComponentClassName();
                 if (className != null) {
                     Map<String, PsiMethod> setters = VaadinUtils.getClassUsableSetters(component.getProject(), className);
                     for (Map.Entry<String, PsiMethod> entry : setters.entrySet()) {
 
-                        if (!attrs.contains(entry.getKey())) {
+                        if (!attrNames.contains(entry.getKey())) {
+
+                            String typeClass = entry.getValue().getParameterList().getParameters()[0].getType().getCanonicalText();
 
                             // Basic setter mapping
                             LookupElementBuilder builder = LookupElementBuilder.create(entry.getKey())
-                                    .appendTailText(" " + entry.getValue().getText(), true)
+                                    .withTypeText(typeClass, true)
                                     .withIcon(VaadinIcons.VAADIN_16);
 
                             // Non-boolean will have value by default
-                            if (!"boolean".equals(entry.getValue().getParameterList().getParameters()[0].getType().getCanonicalText())) {
+                            if (!"boolean".equals(typeClass)) {
                                 builder = builder.withInsertHandler(new XmlAttributeInsertHandler());
                             }
 
-                            // Local id
                             result.addElement(builder);
                         }
                     }
@@ -208,14 +247,12 @@ public class VaadinDesignCompletionContributor extends CompletionContributor {
                     if (element instanceof VDComponent) {
 
                         String name = attr.getName();
-                        String className = ((VDComponent) element).getComponentClassName();
                         if ("_id".equals(name)) {
 
                         }
 
                         // Find by type
-                        String setterName = VaadinUtils.capitalizeSetter(name);
-                        PsiMethod setter = PluginUtils.findClassSetter(element.getProject(), className, setterName);
+                        PsiMethod setter = attr.getSetter();
                         if (setter != null) {
 
                             PsiType type = setter.getParameterList().getParameters()[0].getType();
@@ -235,23 +272,27 @@ public class VaadinDesignCompletionContributor extends CompletionContributor {
 
                                 case "com.vaadin.server.Resource":
 
-                                    // FontAwesome autocomplete
-                                    PsiClass faClass = PluginUtils.findClass(element.getProject(), "com.vaadin.server.FontAwesome");
-                                    PsiField[] allFields = faClass.getAllFields();
-                                    for (PsiField icon : allFields) {
+                                    String value = parameters.getOriginalPosition().getText().substring(1);
+                                    if (!value.startsWith("font://")) {
+                                        result.addElement(LookupElementBuilder.create("font://"));
+                                    } else {
 
-                                        String text = icon.getText();
-                                        if (text.contains("('")) {
+                                        // FontAwesome autocomplete
+                                        PsiClass faClass = PluginUtils.findClass(element.getProject(), "com.vaadin.server.FontAwesome");
+                                        PsiField[] allFields = faClass.getAllFields();
+                                        for (PsiField icon : allFields) {
 
-                                            String unicode = text.substring(text.length() - 6, text.length() - 2);
-                                            int codepoint = Integer.parseInt(unicode, 16);
+                                            String text = icon.getText();
+                                            if (text.contains("('")) {
 
-                                            LookupElementBuilder builder = LookupElementBuilder.create("font://" + icon.getName())
-                                                    .withIcon(new FontAwesomeIcon(codepoint, 14));
-                                            result.addElement(builder);
+                                                String unicode = text.substring(text.length() - 6, text.length() - 2);
+                                                int codepoint = Integer.parseInt(unicode, 16);
+
+                                                LookupElementBuilder builder = LookupElementBuilder.create("font://" + icon.getName())
+                                                        .withIcon(VaadinIcons.fontAwesome(codepoint));
+                                                result.addElement(builder);
+                                            }
                                         }
-                                        System.out.println(text);
-
                                     }
                                     break;
 

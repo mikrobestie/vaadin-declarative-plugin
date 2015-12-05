@@ -2,22 +2,30 @@ package cz.mikrobestie.idea.vaadin.declarative.psi.impl;
 
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.impl.source.resolve.reference.ReferenceProvidersRegistry;
+import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.IncorrectOperationException;
+import cz.mikrobestie.idea.vaadin.declarative.PluginUtils;
 import cz.mikrobestie.idea.vaadin.declarative.VaadinUtils;
 import cz.mikrobestie.idea.vaadin.declarative.psi.*;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 /**
  * Created by Michal on 24.11.2015.
  */
-public abstract class VDNamedElementImpl extends ASTWrapperPsiElement implements VDNamedElement {
+public abstract class VDComponentHelperImpl extends ASTWrapperPsiElement implements VDComponentHelper {
 
-    public VDNamedElementImpl(@NotNull ASTNode node) {
+    public VDComponentHelperImpl(@NotNull ASTNode node) {
         super(node);
     }
 
@@ -56,6 +64,7 @@ public abstract class VDNamedElementImpl extends ASTWrapperPsiElement implements
         return ReferenceProvidersRegistry.getReferencesFromProviders(this);
     }
 
+    @Override
     public String getComponentClassName() {
         String name = getName();
         if (name != null) {
@@ -72,5 +81,24 @@ public abstract class VDNamedElementImpl extends ASTWrapperPsiElement implements
             }
         }
         return null;
+    }
+
+    @Override
+    public PsiClass getComponentClass() {
+        String className = getComponentClassName();
+        return className == null ? null : PluginUtils.findClass(getProject(), className);
+    }
+
+    @Override
+    public Set<String> getAttrNames() {
+        List<VDAttr> list = PsiTreeUtil.getChildrenOfTypeAsList(this, VDAttr.class);
+        if (!list.isEmpty()) {
+            Set<String> names = new HashSet<>();
+            for (VDAttr attr : list) {
+                names.add(attr.getName());
+            }
+            return names;
+        }
+        return Collections.emptySet();
     }
 }
