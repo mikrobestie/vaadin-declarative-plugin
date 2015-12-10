@@ -136,7 +136,7 @@ public class VaadinDesignParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // EL_LEFT ELEM_NAME Attr* (EL_CLOSE_RIGHT | EL_RIGHT Component* ComponentClose)
+  // EL_LEFT ELEM_NAME Attr* (EL_CLOSE_RIGHT | EL_RIGHT (COMMENT | Component)* ComponentClose)
   public static boolean Component(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "Component")) return false;
     if (!nextTokenIs(b, EL_LEFT)) return false;
@@ -161,7 +161,7 @@ public class VaadinDesignParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  // EL_CLOSE_RIGHT | EL_RIGHT Component* ComponentClose
+  // EL_CLOSE_RIGHT | EL_RIGHT (COMMENT | Component)* ComponentClose
   private static boolean Component_3(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "Component_3")) return false;
     boolean r;
@@ -172,7 +172,7 @@ public class VaadinDesignParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // EL_RIGHT Component* ComponentClose
+  // EL_RIGHT (COMMENT | Component)* ComponentClose
   private static boolean Component_3_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "Component_3_1")) return false;
     boolean r;
@@ -184,16 +184,27 @@ public class VaadinDesignParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // Component*
+  // (COMMENT | Component)*
   private static boolean Component_3_1_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "Component_3_1_1")) return false;
     int c = current_position_(b);
     while (true) {
-      if (!Component(b, l + 1)) break;
+      if (!Component_3_1_1_0(b, l + 1)) break;
       if (!empty_element_parsed_guard_(b, "Component_3_1_1", c)) break;
       c = current_position_(b);
     }
     return true;
+  }
+
+  // COMMENT | Component
+  private static boolean Component_3_1_1_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "Component_3_1_1_0")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, COMMENT);
+    if (!r) r = Component(b, l + 1);
+    exit_section_(b, m, null, r);
+    return r;
   }
 
   /* ********************************************************** */

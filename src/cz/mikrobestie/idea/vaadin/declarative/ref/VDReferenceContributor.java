@@ -1,10 +1,12 @@
 package cz.mikrobestie.idea.vaadin.declarative.ref;
 
-import com.intellij.patterns.PlatformPatterns;
-import com.intellij.psi.*;
-import com.intellij.util.ProcessingContext;
+import com.intellij.psi.PsiReferenceContributor;
+import com.intellij.psi.PsiReferenceRegistrar;
+import cz.mikrobestie.idea.vaadin.declarative.VaadinDeclarativeLanguage;
 import cz.mikrobestie.idea.vaadin.declarative.psi.VDComponent;
 import org.jetbrains.annotations.NotNull;
+
+import static com.intellij.patterns.PlatformPatterns.psiElement;
 
 /**
  * Created by Michal on 24.11.2015.
@@ -12,25 +14,11 @@ import org.jetbrains.annotations.NotNull;
 public class VDReferenceContributor extends PsiReferenceContributor {
 
     @Override
-    public void registerReferenceProviders(PsiReferenceRegistrar registrar) {
+    public void registerReferenceProviders(@NotNull PsiReferenceRegistrar registrar) {
 
-        registrar.registerReferenceProvider(PlatformPatterns.psiElement(VDComponent.class),
-                new PsiReferenceProvider() {
-
-                    @NotNull
-                    @Override
-                    public PsiReference[] getReferencesByElement(@NotNull PsiElement element, @NotNull ProcessingContext context) {
-
-                        VDComponent component = (VDComponent) element;
-                        String className = component.getComponentClassName();
-                        if (className != null) {
-
-                            // TODO
-//                            JavaClassReference javaClassReference = JavaClassReferenceCompletionContributor.findJavaClassReference(element.getContainingFile(), 0);
-//                            return new PsiReference[] {javaClassReference};
-                        }
-                        return new PsiReference[0];
-                    }
-                });
+        registrar.registerReferenceProvider(
+                psiElement(VDComponent.class)
+                        .withLanguage(VaadinDeclarativeLanguage.INSTANCE)
+                , new VDComponentClassReferenceProvider());
     }
 }

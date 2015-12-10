@@ -17,25 +17,20 @@ import java.util.List;
 /**
  * Created by Michal on 24.11.2015.
  */
-public class VDReference extends PsiReferenceBase<PsiElement> implements PsiPolyVariantReference {
+public class VDComponentReference extends PsiReferenceBase<VDComponent> implements PsiPolyVariantReference {
 
-    private String key;
-
-    public VDReference(@NotNull PsiElement element, TextRange textRange) {
+    public VDComponentReference(@NotNull VDComponent element, TextRange textRange) {
         super(element, textRange);
-        key = element.getText().substring(textRange.getStartOffset(), textRange.getEndOffset());
     }
 
     @NotNull
     @Override
     public ResolveResult[] multiResolve(boolean incompleteCode) {
-        Project project = myElement.getProject();
-        final List<VDComponent> properties = VDUtils.findComponents(project, key);
-        List<ResolveResult> results = new ArrayList<>();
-        for (VDComponent property : properties) {
-            results.add(new PsiElementResolveResult(property));
+        PsiClass componentClass = getElement().getComponentClass();
+        if (componentClass != null) {
+            return new ResolveResult[] {new PsiElementResolveResult(componentClass)};
         }
-        return results.toArray(new ResolveResult[results.size()]);
+        return new ResolveResult[0];
     }
 
     @Nullable

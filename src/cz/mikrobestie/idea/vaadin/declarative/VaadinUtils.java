@@ -1,7 +1,9 @@
 package cz.mikrobestie.idea.vaadin.declarative;
 
 import com.intellij.openapi.project.Project;
-import com.intellij.psi.*;
+import com.intellij.psi.PsiClass;
+import com.intellij.psi.PsiMethod;
+import com.intellij.psi.PsiParameter;
 
 import java.util.HashMap;
 import java.util.List;
@@ -11,6 +13,60 @@ import java.util.Map;
  * Created by Michal on 18.11.2015.
  */
 public class VaadinUtils {
+
+    private static final Map<String, Map<String, String>> componentAttrMap = new HashMap<>();
+
+
+    static {
+
+        // AbstractComponent
+        Map<String, String> attrs = new HashMap<>();
+        attrs.put("_id", "java.lang.String");
+        attrs.put("error", "java.lang.String");
+        attrs.put("width-auto", "void");
+        attrs.put("width-full", "void");
+        attrs.put("height-auto", "void");
+        attrs.put("height-full", "void");
+        attrs.put("size-auto", "void");
+        attrs.put("size-full", "void");
+        componentAttrMap.put("com.vaadin.ui.AbstractComponent", attrs);
+
+        // Button
+        attrs = new HashMap<>();
+        attrs.put("icon-alt", "java.lang.String");
+        attrs.put("click-shortcut", "com.vaadin.event.ShortcutAction");
+        attrs.put("plain-text", "java.lang.Boolean");
+        componentAttrMap.put("com.vaadin.ui.Button", attrs);
+
+        // AbstractOrderedLayout
+        attrs = new HashMap<>();
+        attrs.put("margin-top", "void");
+        attrs.put("margin-right", "void");
+        attrs.put("margin-bottom", "void");
+        attrs.put("margin-left", "void");
+        componentAttrMap.put("com.vaadin.ui.AbstractOrderedLayout", attrs);
+    }
+
+
+    /**
+     * Returns maps of custom attributes for given class.
+     *
+     * @param psiClass Class
+     * @return Custom attributes
+     */
+    public static Map<String, String> getCustomAttributes(PsiClass psiClass) {
+
+        Map<String, String> attrs = new HashMap<>();
+        while (psiClass != null) {
+            Map<String, String> add = componentAttrMap.get(psiClass.getQualifiedName());
+            if (add != null) {
+                attrs.putAll(add);
+            }
+            psiClass = psiClass.getSuperClass();
+        }
+        return attrs;
+    }
+
 
     public static String decapitalize(String name) {
         String[] split = name.split("(?=\\p{Upper})");
@@ -83,6 +139,8 @@ public class VaadinUtils {
                     case "double":
 
                     case "com.vaadin.server.Resource":
+
+                    case "com.vaadin.event.ShortcutAction":
 
                     case "java.lang.Enum":
 

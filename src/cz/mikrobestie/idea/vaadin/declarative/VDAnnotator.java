@@ -5,6 +5,7 @@ import com.intellij.lang.annotation.Annotator;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiMethod;
 import cz.mikrobestie.idea.vaadin.declarative.psi.VDAttr;
 import cz.mikrobestie.idea.vaadin.declarative.psi.VDComponent;
 import org.jetbrains.annotations.NotNull;
@@ -27,27 +28,59 @@ public class VDAnnotator implements Annotator {
             VDAttr attr = (VDAttr) element;
 
             // Components
-            if (attr.getComponent() != null && attr.getComponent().getComponentClass() != null) {
+            if (attr.getComponent() != null) {
 
-                // Parent attributes - not validated by Vaadin
-                String name = attr.getName();
-                if (name != null) {
+                PsiClass psiClass = attr.getComponent().getComponentClass();
+                if (psiClass != null) {
 
-                    // Parent component attributes
-                    if (name.startsWith(":")) {
-                        return;
-                    }
+                    // Parent attributes - not validated by Vaadin
+                    String name = attr.getName();
+                    if (name != null) {
 
-                    // Common attributes
-                    if (VaadinDesignCompletionContributor.getAttrs().containsKey(name)
-                            || VaadinDesignCompletionContributor.getNoValueAttrs().containsKey(name)) {
-                        return;
-                    }
+                        // Name check
+                        if (name.startsWith(":")) {
+                            // Parent component attributes
+                        } else if (VaadinUtils.getCustomAttributes(psiClass).get(name) != null) {
+                            // Custom attributes
+                        } else if (attr.getSetter() == null)  {
+                            // Unknown attr
+                            TextRange range = attr.getNameIdentifier().getTextRange();
+                            holder.createErrorAnnotation(range, "Unknown attribute '" + name + "'");
+                        }
 
-                    // Setters
-                    if (attr.getSetter() == null)  {
-                        TextRange range = ((VDAttr) element).getNameIdentifier().getTextRange();
-                        holder.createErrorAnnotation(range, "Unknown attribute '" + name + "'");
+                        // Value check
+                        PsiMethod setter = attr.getSetter();
+                        if (setter != null) {
+
+                            String value = attr.getValue();
+                            String type = attr.getType().getCanonicalText();
+
+                            // Boolean handling first
+                            if (value == null) {
+                                if (!"boolean".equals(type) && !"java.lang.Boolean".equals(type) && !"void".equals(type)) {
+                                    holder.createErrorAnnotation(attr.getNameIdentifier(), "Value of type " + type + " expected");
+                                }
+                            } else {
+
+                                String error = null;
+
+                                // Type check
+                                switch (type) {
+
+                                    case "boolean":
+                                    case "java.lang.Boolean":
+
+                                        // Does not have to have a value
+                                        if (!"true".equals(value) && !"false".equals(value)) {
+                                            holder.createWarningAnnotation(attr.getLastChild(), "Resolves to boolean 'true'");
+                                        }
+                                        break;
+                                }
+                                if (error != null) {
+                                    holder.createErrorAnnotation(attr.getLastChild(), error);
+                                }
+                            }
+                        }
                     }
                 }
             }

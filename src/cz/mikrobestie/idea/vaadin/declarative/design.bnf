@@ -20,7 +20,7 @@ HeadTag ::= COMMENT* TAG_HEAD_OPEN (MetaTag | COMMENT)* TAG_HEAD_CLOSE {pin = 2}
 MetaTag ::= COMMENT* TAG_META_OPEN Attr+ EL_CLOSE_RIGHT {pin = 2}
 BodyTag ::= COMMENT* TAG_BODY_OPEN COMMENT* Component COMMENT* TAG_BODY_CLOSE {pin = 2}
 
-Component ::= EL_LEFT ELEM_NAME Attr* (EL_CLOSE_RIGHT | EL_RIGHT Component* ComponentClose) {
+Component ::= EL_LEFT ELEM_NAME Attr* (EL_CLOSE_RIGHT | EL_RIGHT (COMMENT | Component)* ComponentClose) {
 //    pin             = 2
 //    recoverWhile    = "ComponentRecover"
     mixin           = "cz.mikrobestie.idea.vaadin.declarative.psi.impl.VDComponentHelperImpl"

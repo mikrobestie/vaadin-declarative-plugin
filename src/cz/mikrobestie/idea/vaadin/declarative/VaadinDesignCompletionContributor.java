@@ -6,7 +6,6 @@ import com.intellij.icons.AllIcons;
 import com.intellij.patterns.PlatformPatterns;
 import com.intellij.psi.*;
 import com.intellij.util.ProcessingContext;
-import com.intellij.util.containers.hash.LinkedHashMap;
 import cz.mikrobestie.idea.vaadin.declarative.icons.VaadinIcons;
 import cz.mikrobestie.idea.vaadin.declarative.psi.*;
 import org.jetbrains.annotations.NotNull;
@@ -21,30 +20,6 @@ import java.util.stream.Collectors;
  */
 public class VaadinDesignCompletionContributor extends CompletionContributor {
 
-
-    private static Map<String, String> attrs = new LinkedHashMap<>();
-    private static Map<String, String> noValueAttrs = new LinkedHashMap<>();
-
-    static {
-        attrs.put("_id", "Design field binding");
-        attrs.put("locale", "Component locale");
-        attrs.put("error", "Component error");
-
-        noValueAttrs.put("width-auto", "Undefined width");
-        noValueAttrs.put("height-auto", "Undefined height");
-        noValueAttrs.put("width-full", "100% width");
-        noValueAttrs.put("height-full", "100% height");
-        noValueAttrs.put("size-auto", "Undefined size");
-        noValueAttrs.put("size-full", "100% by 100% size");
-    }
-
-    public static Map<String, String> getAttrs() {
-        return attrs;
-    }
-
-    public static Map<String, String> getNoValueAttrs() {
-        return noValueAttrs;
-    }
 
     public VaadinDesignCompletionContributor() {
 
@@ -165,22 +140,18 @@ public class VaadinDesignCompletionContributor extends CompletionContributor {
                 VDComponent component = (VDComponent) element;
                 Set<String> attrNames = component.getAttrNames();
 
-                // Default AbstractComponent attributes - with value
-                for (Map.Entry<String, String> entry : attrs.entrySet()) {
+                // Custom attributes for known components
+                for (Map.Entry<String, String> entry : VaadinUtils.getCustomAttributes(component.getComponentClass()).entrySet()) {
                     if (!attrNames.contains(entry.getKey())) {
-                        result.addElement(LookupElementBuilder.create(entry.getKey())
-                                .withInsertHandler(new XmlAttributeInsertHandler())
-                                .withTypeText(entry.getValue())
-                                .withIcon(VaadinIcons.VAADIN_16));
-                    }
-                }
+                        LookupElementBuilder builder = LookupElementBuilder.create(entry.getKey())
+                                .withTypeText(entry.getValue(), true)
+                                .withIcon(VaadinIcons.VAADIN_16);
 
-                // Default AbstractComponent attributes - no value
-                for (Map.Entry<String, String> entry : noValueAttrs.entrySet()) {
-                    if (!attrNames.contains(entry.getKey())) {
-                        result.addElement(LookupElementBuilder.create(entry.getKey())
-                                .withTypeText(entry.getValue())
-                                .withIcon(VaadinIcons.VAADIN_16));
+                        // Non-boolean will have value by default
+                        if (!("boolean".equals(entry.getValue()) || "java.lang.Boolean".equals(entry.getValue()) || "void".equals(entry.getValue()))) {
+                            builder = builder.withInsertHandler(new XmlAttributeInsertHandler());
+                        }
+                        result.addElement(builder);
                     }
                 }
 
@@ -200,7 +171,7 @@ public class VaadinDesignCompletionContributor extends CompletionContributor {
                                     .withIcon(VaadinIcons.VAADIN_16);
 
                             // Non-boolean will have value by default
-                            if (!"boolean".equals(typeClass)) {
+                            if (!("boolean".equals(typeClass) || "java.lang.Boolean".equals(typeClass) || "void".equals(typeClass))) {
                                 builder = builder.withInsertHandler(new XmlAttributeInsertHandler());
                             }
 
@@ -255,7 +226,7 @@ public class VaadinDesignCompletionContributor extends CompletionContributor {
                         PsiMethod setter = attr.getSetter();
                         if (setter != null) {
 
-                            PsiType type = setter.getParameterList().getParameters()[0].getType();
+                            PsiType type = attr.getType();
                             if (type instanceof PsiClassType) {
                                 PsiClass aClass = ((PsiClassType) type).resolve();
                                 if (aClass.isEnum()) {

@@ -2,10 +2,7 @@ package cz.mikrobestie.idea.vaadin.declarative.psi.impl;
 
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import com.intellij.lang.ASTNode;
-import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiReference;
-import com.intellij.psi.impl.source.resolve.reference.ReferenceProvidersRegistry;
+import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.IncorrectOperationException;
 import cz.mikrobestie.idea.vaadin.declarative.PluginUtils;
@@ -61,7 +58,12 @@ public abstract class VDComponentHelperImpl extends ASTWrapperPsiElement impleme
     @NotNull
     @Override
     public PsiReference[] getReferences() {
-        return ReferenceProvidersRegistry.getReferencesFromProviders(this);
+        PsiClass componentClass = getComponentClass();
+        if (componentClass != null) {
+            PsiJavaCodeReferenceElement element = PsiElementFactory.SERVICE.getInstance(getProject()).createClassReferenceElement(componentClass);
+            return new PsiReference[] {element};
+        }
+        return new PsiReference[0];
     }
 
     @Override

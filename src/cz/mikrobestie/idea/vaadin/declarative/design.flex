@@ -8,8 +8,11 @@ import cz.mikrobestie.idea.vaadin.declarative.psi.VDTypes;
 %%
 
 %{
+
+  private int commentStart = -1;
+
   public VaadinDesignLexer() {
-    this((java.io.Reader)null);
+    this(null);
   }
 %}
 
@@ -49,7 +52,7 @@ TAG_BODY_CLOSE = "</body>"
 
 <YYINITIAL> {
 
-    "<!--"                          { yybegin(IN_COMMENT); }
+    "<!--"                          { yybegin(IN_COMMENT); commentStart = zzStartRead;}
 
     // Fixed element names
     {DOCTYPE_DECL}                  { return VDTypes.DOCTYPE_DECL; }
@@ -78,7 +81,7 @@ TAG_BODY_CLOSE = "</body>"
 
 <IN_COMMENT> {
 
-    "-->"                           { yybegin(YYINITIAL); return VDTypes.COMMENT; }
+    "-->"                           { yybegin(YYINITIAL); zzStartRead = commentStart; return VDTypes.COMMENT; }
 
     [^-\n]+                         { }
 
