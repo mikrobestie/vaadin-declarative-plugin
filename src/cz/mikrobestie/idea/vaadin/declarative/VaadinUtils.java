@@ -267,7 +267,7 @@ public class VaadinUtils {
                 nextSibling = nextSibling.getNextSibling();
             }
             if (designName == null) {
-                throw new RuntimeException("Cannot find inner class name in " + javaFile.getName() + " class");
+                designName = javaFile.getName() + ".html";
             }
         }
 

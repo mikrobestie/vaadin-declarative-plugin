@@ -24,12 +24,14 @@ public class VaadinDesignClassFieldAnnotator implements Annotator {
 
                 PsiClass aClass = field.getContainingClass();
                 PsiAnnotation aDesignRoot = AnnotationUtil.findAnnotation(aClass, "com.vaadin.annotations.DesignRoot");
-                VaadinDesignFile designFile = VaadinUtils.getFileByDesignRootAnnotation(aDesignRoot);
-                VDComponent boundComponent = designFile.getComponentById(field.getName());
-                if (boundComponent == null) {
-                    holder.createErrorAnnotation(field.getNameIdentifier(), "Field is not bound to component in design file " + designFile.getName());
-                } else if (!PluginUtils.isAssignableFrom(field.getType().getCanonicalText(), boundComponent.getComponentClass())) {
-                    holder.createErrorAnnotation(field.getTypeElement(), "Cannot be assigned from " + boundComponent.getComponentClassName() + " defined in design file");
+                if (aDesignRoot != null) {
+                    VaadinDesignFile designFile = VaadinUtils.getFileByDesignRootAnnotation(aDesignRoot);
+                    VDComponent boundComponent = designFile.getComponentById(field.getName());
+                    if (boundComponent == null) {
+                        holder.createErrorAnnotation(field.getNameIdentifier(), "Field is not bound to component in design file " + designFile.getName());
+                    } else if (!PluginUtils.isAssignableFrom(field.getType().getCanonicalText(), boundComponent.getComponentClass())) {
+                        holder.createErrorAnnotation(field.getTypeElement(), "Cannot be assigned from " + boundComponent.getComponentClassName() + " defined in design file");
+                    }
                 }
             }
         }

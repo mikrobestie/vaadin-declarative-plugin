@@ -122,6 +122,13 @@ public class PluginUtils {
     }
 
     public static boolean isAssignableFrom(String fqn, PsiClass type) {
+
+        // Dont count in generics
+        int i = fqn.indexOf('<');
+        if (i > -1) {
+            fqn = fqn.substring(0, i);
+        }
+
         while (type != null) {
             if (fqn.equals(type.getQualifiedName())) {
                 return true;
