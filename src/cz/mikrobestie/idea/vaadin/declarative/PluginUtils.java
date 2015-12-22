@@ -120,4 +120,14 @@ public class PluginUtils {
         return type instanceof PsiClassType
                 && (((PsiClassType) type).resolve()).isEnum();
     }
+
+    public static boolean isAssignableFrom(String fqn, PsiClass type) {
+        while (type != null) {
+            if (fqn.equals(type.getQualifiedName())) {
+                return true;
+            }
+            type = type.getSuperClass();
+        }
+        return false;
+    }
 }

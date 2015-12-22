@@ -67,6 +67,9 @@ public abstract class VDAttrHelperImpl extends ASTWrapperPsiElement implements V
             return setter.getParameterList().getParameters()[0].getType();
         }
         String type = VaadinUtils.getCustomAttributes(getComponent().getComponentClass()).get(getName());
+        if (type == null) {
+            type = VaadinUtils.getParentAttributes(getComponent().getComponentClass()).get(getName());
+        }
         if (type != null) {
             return PsiType.getTypeByName(type, getProject(), GlobalSearchScope.projectScope(getProject()));
         }

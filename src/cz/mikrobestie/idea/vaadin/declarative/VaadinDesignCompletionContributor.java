@@ -158,6 +158,7 @@ public class VaadinDesignCompletionContributor extends CompletionContributor {
                 // Setter attribute mapping
                 String className = component.getComponentClassName();
                 if (className != null) {
+
                     Map<String, PsiMethod> setters = VaadinUtils.getClassUsableSetters(component.getProject(), className);
                     for (Map.Entry<String, PsiMethod> entry : setters.entrySet()) {
 
@@ -176,6 +177,28 @@ public class VaadinDesignCompletionContributor extends CompletionContributor {
                             }
 
                             result.addElement(builder);
+                        }
+                    }
+
+                    VDComponent parent = component.getParentComponent();
+                    if (parent != null) {
+
+                        Map<String, String> parentAttributes = VaadinUtils.getParentAttributes(parent.getComponentClass());
+                        for (Map.Entry<String, String> entry : parentAttributes.entrySet()) {
+
+                            if (!attrNames.contains(entry.getKey())) {
+
+                                // Basic setter mapping
+                                LookupElementBuilder builder = LookupElementBuilder.create(entry.getKey())
+                                        .withTypeText(entry.getValue(), true)
+                                        .withIcon(VaadinIcons.VAADIN_16);
+
+                                // Non-boolean will have value by default
+                                if (!("boolean".equals(entry.getValue()) || "java.lang.Boolean".equals(entry.getValue()) || "void".equals(entry.getValue()))) {
+                                    builder = builder.withInsertHandler(new XmlAttributeInsertHandler());
+                                }
+                                result.addElement(builder);
+                            }
                         }
                     }
                 }
@@ -223,13 +246,12 @@ public class VaadinDesignCompletionContributor extends CompletionContributor {
                         }
 
                         // Find by type
-                        PsiMethod setter = attr.getSetter();
-                        if (setter != null) {
+                        PsiType type = attr.getType();
+                        if (type != null) {
 
-                            PsiType type = attr.getType();
                             if (type instanceof PsiClassType) {
                                 PsiClass aClass = ((PsiClassType) type).resolve();
-                                if (aClass.isEnum()) {
+                                if (aClass != null && aClass.isEnum()) {
                                     for (PsiField field : aClass.getFields()) {
                                         if (field instanceof PsiEnumConstant) {
                                             result.addElement(LookupElementBuilder.create(field.getName()));
@@ -238,7 +260,6 @@ public class VaadinDesignCompletionContributor extends CompletionContributor {
                                     return;
                                 }
                             }
-
                             switch (type.getCanonicalText()) {
 
                                 case "com.vaadin.server.Resource":
@@ -259,7 +280,7 @@ public class VaadinDesignCompletionContributor extends CompletionContributor {
                                                 String unicode = text.substring(text.length() - 6, text.length() - 2);
                                                 int codepoint = Integer.parseInt(unicode, 16);
 
-                                                LookupElementBuilder builder = LookupElementBuilder.create("font://" + icon.getName())
+                                                LookupElementBuilder builder = LookupElementBuilder.create(icon.getName())
                                                         .withIcon(VaadinIcons.fontAwesome(codepoint));
                                                 result.addElement(builder);
                                             }

@@ -95,6 +95,21 @@ public class VaadinDesignFile extends PsiFileBase {
         return null;
     }
 
+    /**
+     * Returns component by ID.
+     *
+     * @param id ID
+     * @return
+     */
+    public VDComponent getComponentById(String id) {
+        for (VDComponent component : PsiTreeUtil.findChildrenOfType(this, VDComponent.class)) {
+            if (id.equals(component.getId())) {
+                return component;
+            }
+        }
+        return null;
+    }
+
 
     /**
      * Holder for prefix definition of custom package components.

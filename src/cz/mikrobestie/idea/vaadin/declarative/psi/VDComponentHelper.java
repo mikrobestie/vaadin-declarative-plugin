@@ -15,4 +15,8 @@ public interface VDComponentHelper extends PsiNameIdentifierOwner {
     PsiClass getComponentClass();
 
     Set<String> getAttrNames();
+
+    String getId();
+
+    VDComponent getParentComponent();
 }

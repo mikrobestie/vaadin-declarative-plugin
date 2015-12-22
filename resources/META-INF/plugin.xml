@@ -31,9 +31,11 @@
         <lang.parserDefinition language="Vaadin declarative" implementationClass="cz.mikrobestie.idea.vaadin.declarative.VaadinDesignParserDefinition"/>
         <completion.contributor language="Vaadin declarative" implementationClass="cz.mikrobestie.idea.vaadin.declarative.VaadinDesignCompletionContributor"/>
         <lang.commenter language="Vaadin declarative" implementationClass="com.intellij.lang.xml.XmlCommenter"/>
-        <annotator language="Vaadin declarative" implementationClass="cz.mikrobestie.idea.vaadin.declarative.VDAnnotator"/>
 
-        <psi.referenceContributor implementation="cz.mikrobestie.idea.vaadin.declarative.ref.VDReferenceContributor"/>
+        <annotator language="Vaadin declarative" implementationClass="cz.mikrobestie.idea.vaadin.declarative.VDAnnotator"/>
+        <annotator language="JAVA" implementationClass="cz.mikrobestie.idea.vaadin.declarative.VaadinDesignClassFieldAnnotator"/>
+
+        <!--<psi.referenceContributor implementation="cz.mikrobestie.idea.vaadin.declarative.ref.VDReferenceContributor"/>-->
         <lang.formatter language="Vaadin declarative" implementationClass="cz.mikrobestie.idea.vaadin.declarative.formatting.VDFormattingModelBuilder"/>
 
     </extensions>

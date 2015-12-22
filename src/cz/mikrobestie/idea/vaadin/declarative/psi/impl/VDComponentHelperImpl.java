@@ -33,6 +33,20 @@ public abstract class VDComponentHelperImpl extends ASTWrapperPsiElement impleme
     }
 
     @Override
+    public String getId() {
+        List<VDAttr> list = PsiTreeUtil.getChildrenOfTypeAsList(this, VDAttr.class);
+        String globalId = null;
+        for (VDAttr attr : list) {
+            if (attr.getName().equals("_id")) {
+                return attr.getValue();
+            } else if (attr.getName().equals("id")) {
+                globalId = attr.getValue();
+            }
+        }
+        return globalId;
+    }
+
+    @Override
     public PsiElement setName(@NonNls @NotNull String name) throws IncorrectOperationException {
         ASTNode keyNode = getNode().findChildByType(VDTypes.ELEM_NAME);
         if (keyNode != null) {
@@ -102,5 +116,17 @@ public abstract class VDComponentHelperImpl extends ASTWrapperPsiElement impleme
             return names;
         }
         return Collections.emptySet();
+    }
+
+    @Override
+    public VDComponent getParentComponent() {
+        PsiElement parent = getParent();
+        while (parent != null) {
+            if (parent instanceof VDComponent) {
+                return (VDComponent) parent;
+            }
+            parent = parent.getParent();
+        }
+        return null;
     }
 }
