@@ -264,26 +264,20 @@ public class VaadinDesignCompletionContributor extends CompletionContributor {
 
                                 case "com.vaadin.server.Resource":
 
-                                    String value = parameters.getOriginalPosition().getText().substring(1);
-                                    if (!value.startsWith("font://")) {
-                                        result.addElement(LookupElementBuilder.create("font://"));
-                                    } else {
+                                    // FontAwesome autocomplete
+                                    PsiClass faClass = PluginUtils.findClass(element.getProject(), "com.vaadin.server.FontAwesome");
+                                    PsiField[] allFields = faClass.getAllFields();
+                                    for (PsiField icon : allFields) {
 
-                                        // FontAwesome autocomplete
-                                        PsiClass faClass = PluginUtils.findClass(element.getProject(), "com.vaadin.server.FontAwesome");
-                                        PsiField[] allFields = faClass.getAllFields();
-                                        for (PsiField icon : allFields) {
+                                        String text = icon.getText();
+                                        if (text.contains("('")) {
 
-                                            String text = icon.getText();
-                                            if (text.contains("('")) {
+                                            String unicode = text.substring(text.length() - 6, text.length() - 2);
+                                            int codepoint = Integer.parseInt(unicode, 16);
 
-                                                String unicode = text.substring(text.length() - 6, text.length() - 2);
-                                                int codepoint = Integer.parseInt(unicode, 16);
-
-                                                LookupElementBuilder builder = LookupElementBuilder.create(icon.getName())
-                                                        .withIcon(VaadinIcons.fontAwesome(codepoint));
-                                                result.addElement(builder);
-                                            }
+                                            LookupElementBuilder builder = LookupElementBuilder.create("font://" + icon.getName())
+                                                    .withIcon(VaadinIcons.fontAwesome(codepoint));
+                                            result.addElement(builder);
                                         }
                                     }
                                     break;
