@@ -54,8 +54,10 @@ public abstract class VDAttrHelperImpl extends ASTWrapperPsiElement implements V
         VDComponent component = getComponent();
         if (name != null && component != null) {
             String className = component.getComponentClassName();
-            String setterName = VaadinUtils.capitalizeSetter(name);
-            return PluginUtils.findClassSetter(getProject(), className, setterName);
+            if (className != null) {
+                String setterName = VaadinUtils.capitalizeSetter(name);
+                return PluginUtils.findClassSetter(getProject(), className, setterName);
+            }
         }
         return null;
     }
