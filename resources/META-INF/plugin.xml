@@ -5,8 +5,7 @@
     <vendor email="support@yourcompany.com" url="http://www.yourcompany.com">YourCompany</vendor>
 
     <description><![CDATA[
-      Enter short description for your plugin here.<br>
-      <em>most HTML tags may be used</em>
+      Plugin provides support for Vaadin declarative HTML files. Includes syntax checking
     ]]></description>
 
     <change-notes><![CDATA[

@@ -18,10 +18,13 @@ public class VDAnnotator implements Annotator {
     @Override
     public void annotate(@NotNull PsiElement element, @NotNull AnnotationHolder holder) {
         if (element instanceof VDComponent) {
-            PsiClass psiClass = ((VDComponent) element).getComponentClass();
-            if (psiClass == null) {
-                TextRange range = ((VDComponent) element).getNameIdentifier().getTextRange();
-                holder.createErrorAnnotation(range, "Compponent class " + ((VDComponent) element).getComponentClassName() + " not found");
+            String componentClassName = ((VDComponent) element).getComponentClassName();
+            if (componentClassName != null) {
+                PsiClass psiClass = ((VDComponent) element).getComponentClass();
+                if (psiClass == null) {
+                    TextRange range = ((VDComponent) element).getNameIdentifier().getTextRange();
+                    holder.createErrorAnnotation(range, "Compponent class " + componentClassName + " not found");
+                }
             }
         } else if (element instanceof VDAttr) {
 
