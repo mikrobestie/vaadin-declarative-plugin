@@ -1,16 +1,15 @@
 <idea-plugin version="2">
     <id>cz.mikrobestie.idea.vaadin.declarative</id>
     <name>Vaadin Declarative Plugin</name>
-    <version>0.1.2</version>
-    <vendor email="support@yourcompany.com" url="http://www.yourcompany.com">YourCompany</vendor>
+    <version>0.1.3</version>
+    <vendor email="michal.kytyr@gmail.com">Michal Kytýr</vendor>
 
     <description><![CDATA[
-      Plugin provides support for Vaadin declarative HTML files. Includes syntax checking
+      Provides support for Vaadin declarative HTML files. Includes syntax checking and basic support for @DesignRoot
+      annotated java classes.
     ]]></description>
 
     <change-notes><![CDATA[
-      Add change notes here.<br>
-      <em>most HTML tags may be used</em>
     ]]>
     </change-notes>
 
