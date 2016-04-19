@@ -24,7 +24,7 @@ import cz.mikrobestie.idea.vaadin.declarative.psi.VDTypes;
 %unicode
 
 WHITE_SPACE = [\ \t\f\r\n]
-ELEM_NAME = [a-z]+(-[a-z]+)*
+COMPONENT_NAME = [a-z]+(-[a-z]+)*
 ATTR_NAME = [_:a-z]?[a-z-]*
 ATTR_VALUE = \"[^\"]*\"?|'[^']*'?
 EL_LEFT = "<"
@@ -34,16 +34,19 @@ EL_CLOSE_RIGHT = "/>"
 EQ = "="
 
 /* Fixed tags */
-DOCTYPE_DECL = "<!DOCTYPE html>"
-TAG_HTML_OPEN = "<html"
-TAG_HTML_CLOSE = "</html>"
-TAG_HEAD_OPEN = "<head>"
-TAG_HEAD_CLOSE = "</head>"
-TAG_META_OPEN = "<meta"
-TAG_BODY_OPEN = "<body>"
-TAG_BODY_CLOSE = "</body>"
+TAG_HTML = "html"
+TAG_HEAD = "head"
+TAG_META = "meta"
+TAG_BODY = "body"
 
-%state IN_TAG
+DOCTYPE_DECL = "<!DOCTYPE html>"
+
+/* Others */
+TEXT = [^<>]+
+
+%state IN_TAG_NAME
+%state IN_TAG_NAME_CLOSE
+%state IN_TAG_ATTRS
 %xstate IN_COMMENT
 
 %%
@@ -57,26 +60,42 @@ TAG_BODY_CLOSE = "</body>"
     // Fixed element names
     {DOCTYPE_DECL}                  { return VDTypes.DOCTYPE_DECL; }
 
-    {TAG_HTML_OPEN}                 { yybegin(IN_TAG); return VDTypes.TAG_HTML_OPEN; }
+    {EL_CLOSE_LEFT}                 { yybegin(IN_TAG_NAME_CLOSE); return VDTypes.EL_CLOSE_LEFT; }
 
-    {TAG_HTML_CLOSE}                { return VDTypes.TAG_HTML_CLOSE; }
+    {EL_LEFT}                       { yybegin(IN_TAG_NAME); return VDTypes.EL_LEFT; }
 
-    {TAG_HEAD_OPEN}                 { return VDTypes.TAG_HEAD_OPEN; }
+    // Text
+    {TEXT}                          { return VDTypes.TEXT; }
+}
 
-    {TAG_HEAD_CLOSE}                { return VDTypes.TAG_HEAD_CLOSE; }
+<IN_TAG_NAME> {
 
-    {TAG_META_OPEN}                 { yybegin(IN_TAG); return VDTypes.TAG_META_OPEN; }
+    {TAG_HTML}                      { yybegin(IN_TAG_ATTRS); return VDTypes.TAG_HTML; }
 
-    {TAG_BODY_OPEN}                 { return VDTypes.TAG_BODY_OPEN; }
+    {TAG_HEAD}                      { yybegin(IN_TAG_ATTRS); return VDTypes.TAG_HEAD; }
 
-    {TAG_BODY_CLOSE}                { return VDTypes.TAG_BODY_CLOSE; }
+    {TAG_META}                      { yybegin(IN_TAG_ATTRS); return VDTypes.TAG_META; }
 
-    {EL_CLOSE_LEFT}                 { return VDTypes.EL_CLOSE_LEFT; }
-
-    {EL_LEFT}                       { return VDTypes.EL_LEFT; }
+    {TAG_BODY}                      { yybegin(IN_TAG_ATTRS); return VDTypes.TAG_BODY; }
 
     // Last
-    {ELEM_NAME}                     { yybegin(IN_TAG); return VDTypes.ELEM_NAME; }
+    {COMPONENT_NAME}                { yybegin(IN_TAG_ATTRS); return VDTypes.COMPONENT_NAME; }
+
+    {EL_RIGHT}                      { yybegin(YYINITIAL); return VDTypes.EL_RIGHT; }
+}
+
+<IN_TAG_NAME_CLOSE> {
+
+    {TAG_HTML}                      { yybegin(IN_TAG_ATTRS); return VDTypes.TAG_HTML; }
+
+    {TAG_HEAD}                      { yybegin(IN_TAG_ATTRS); return VDTypes.TAG_HEAD; }
+
+    {TAG_META}                      { yybegin(IN_TAG_ATTRS); return VDTypes.TAG_META; }
+
+    {TAG_BODY}                      { yybegin(IN_TAG_ATTRS); return VDTypes.TAG_BODY; }
+
+    // Last
+    {COMPONENT_NAME}                { yybegin(IN_TAG_ATTRS); return VDTypes.COMPONENT_NAME; }
 }
 
 <IN_COMMENT> {
@@ -90,7 +109,7 @@ TAG_BODY_CLOSE = "</body>"
     \n                              { }
 }
 
-<IN_TAG> {
+<IN_TAG_ATTRS> {
 
     {ATTR_NAME}                     { return VDTypes.ATTR_NAME; }
 

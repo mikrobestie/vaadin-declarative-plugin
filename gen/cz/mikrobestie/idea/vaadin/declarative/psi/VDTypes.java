@@ -18,20 +18,18 @@ public interface VDTypes {
   IElementType ATTR_NAME = new VDTokenType("ATTR_NAME");
   IElementType ATTR_VALUE = new VDTokenType("ATTR_VALUE");
   IElementType COMMENT = new VDTokenType("COMMENT");
+  IElementType COMPONENT_NAME = new VDTokenType("COMPONENT_NAME");
   IElementType DOCTYPE_DECL = new VDTokenType("DOCTYPE_DECL");
-  IElementType ELEM_NAME = new VDTokenType("ELEM_NAME");
   IElementType EL_CLOSE_LEFT = new VDTokenType("EL_CLOSE_LEFT");
   IElementType EL_CLOSE_RIGHT = new VDTokenType("EL_CLOSE_RIGHT");
   IElementType EL_LEFT = new VDTokenType("EL_LEFT");
   IElementType EL_RIGHT = new VDTokenType("EL_RIGHT");
   IElementType EQ = new VDTokenType("EQ");
-  IElementType TAG_BODY_CLOSE = new VDTokenType("TAG_BODY_CLOSE");
-  IElementType TAG_BODY_OPEN = new VDTokenType("TAG_BODY_OPEN");
-  IElementType TAG_HEAD_CLOSE = new VDTokenType("TAG_HEAD_CLOSE");
-  IElementType TAG_HEAD_OPEN = new VDTokenType("TAG_HEAD_OPEN");
-  IElementType TAG_HTML_CLOSE = new VDTokenType("TAG_HTML_CLOSE");
-  IElementType TAG_HTML_OPEN = new VDTokenType("TAG_HTML_OPEN");
-  IElementType TAG_META_OPEN = new VDTokenType("TAG_META_OPEN");
+  IElementType TAG_BODY = new VDTokenType("TAG_BODY");
+  IElementType TAG_HEAD = new VDTokenType("TAG_HEAD");
+  IElementType TAG_HTML = new VDTokenType("TAG_HTML");
+  IElementType TAG_META = new VDTokenType("TAG_META");
+  IElementType TEXT = new VDTokenType("TEXT");
 
   class Factory {
     public static PsiElement createElement(ASTNode node) {

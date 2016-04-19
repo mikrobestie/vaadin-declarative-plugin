@@ -25,7 +25,7 @@ public class VaadinDesignCompletionContributor extends CompletionContributor {
 
         // Element name completion
         extend(CompletionType.BASIC,
-                PlatformPatterns.psiElement(VDTypes.ELEM_NAME).withLanguage(VaadinDeclarativeLanguage.INSTANCE),
+                PlatformPatterns.psiElement(VDTypes.COMPONENT_NAME).withLanguage(VaadinDeclarativeLanguage.INSTANCE),
                 new ComponentNameProvider());
 
         // Local id attribute name completion

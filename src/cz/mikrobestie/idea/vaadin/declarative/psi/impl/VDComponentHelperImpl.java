@@ -28,7 +28,7 @@ public abstract class VDComponentHelperImpl extends ASTWrapperPsiElement impleme
 
     @Override
     public String getName() {
-        ASTNode nameNode = getNode().findChildByType(VDTypes.ELEM_NAME);
+        ASTNode nameNode = getNode().findChildByType(VDTypes.COMPONENT_NAME);
         return nameNode == null ? null : nameNode.getText();
     }
 
@@ -48,11 +48,11 @@ public abstract class VDComponentHelperImpl extends ASTWrapperPsiElement impleme
 
     @Override
     public PsiElement setName(@NonNls @NotNull String name) throws IncorrectOperationException {
-        ASTNode keyNode = getNode().findChildByType(VDTypes.ELEM_NAME);
+        ASTNode keyNode = getNode().findChildByType(VDTypes.COMPONENT_NAME);
         if (keyNode != null) {
 
             VDComponent component = VDElementFactory.createComponent(getProject(), name);
-            ASTNode newKeyNode = component.getNode().findChildByType(VDTypes.ELEM_NAME);
+            ASTNode newKeyNode = component.getNode().findChildByType(VDTypes.COMPONENT_NAME);
             getNode().replaceChild(keyNode, newKeyNode);
         }
         return this;
@@ -61,7 +61,7 @@ public abstract class VDComponentHelperImpl extends ASTWrapperPsiElement impleme
     @Nullable
     @Override
     public PsiElement getNameIdentifier() {
-        ASTNode keyNode = getNode().findChildByType(VDTypes.ELEM_NAME);
+        ASTNode keyNode = getNode().findChildByType(VDTypes.COMPONENT_NAME);
         if (keyNode != null) {
             return keyNode.getPsi();
         } else {
