@@ -1,7 +1,7 @@
 <idea-plugin version="2">
     <id>cz.mikrobestie.idea.vaadin.declarative</id>
     <name>Vaadin Declarative Plugin</name>
-    <version>0.1.3</version>
+    <version>0.1.4</version>
     <vendor email="michal.kytyr@gmail.com">Michal Kytýr</vendor>
 
     <description><![CDATA[
@@ -10,6 +10,12 @@
     ]]></description>
 
     <change-notes><![CDATA[
+        0.1.4
+        -----
+        * fixed text content support
+        * fixed meta tag formatting
+        * added references support from attributes to setters (deos not work every time for unknown reason)
+        * added com.vaadin.ui.Window custom attributes
     ]]>
     </change-notes>
 
