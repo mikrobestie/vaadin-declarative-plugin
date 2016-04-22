@@ -1,15 +1,15 @@
 // This is a generated file. Not intended for manual editing.
 package cz.mikrobestie.idea.vaadin.declarative.lang;
 
+import com.intellij.lang.ASTNode;
+import com.intellij.lang.LightPsiParser;
 import com.intellij.lang.PsiBuilder;
 import com.intellij.lang.PsiBuilder.Marker;
-import static cz.mikrobestie.idea.vaadin.declarative.psi.VDTypes.*;
-import static cz.mikrobestie.idea.vaadin.declarative.lang.VaadinDesignParserUtil.*;
-import com.intellij.psi.tree.IElementType;
-import com.intellij.lang.ASTNode;
-import com.intellij.psi.tree.TokenSet;
 import com.intellij.lang.PsiParser;
-import com.intellij.lang.LightPsiParser;
+import com.intellij.psi.tree.IElementType;
+
+import static cz.mikrobestie.idea.vaadin.declarative.lang.VaadinDesignParserUtil.*;
+import static cz.mikrobestie.idea.vaadin.declarative.psi.VDTypes.*;
 
 @SuppressWarnings({"SimplifiableIfStatement", "UnusedAssignment"})
 public class VaadinDesignParser implements PsiParser, LightPsiParser {
@@ -221,7 +221,7 @@ public class VaadinDesignParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // DOCTYPE_DECL? (HtmlTag | Component)
+  // DOCTYPE_DECL? (Component | HtmlTag)
   static boolean Document(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "Document")) return false;
     boolean r;
@@ -239,13 +239,13 @@ public class VaadinDesignParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  // HtmlTag | Component
+  // Component | HtmlTag
   private static boolean Document_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "Document_1")) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = HtmlTag(b, l + 1);
-    if (!r) r = Component(b, l + 1);
+    r = Component(b, l + 1);
+    if (!r) r = HtmlTag(b, l + 1);
     exit_section_(b, m, null, r);
     return r;
   }

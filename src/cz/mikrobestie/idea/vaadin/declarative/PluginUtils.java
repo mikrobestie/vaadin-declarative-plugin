@@ -87,7 +87,7 @@ public class PluginUtils {
             Query<PsiClass> query = ClassInheritorsSearch.search(psiClass, scope, true);
             return query.findAll().stream()
                     .filter(c -> c.getQualifiedName() != null
-                            && c.getQualifiedName().startsWith(packageName)
+                            && c.getQualifiedName().equals(packageName + "." + c.getName())
                             && !c.isInterface()
                             && !c.getModifierList().hasExplicitModifier("abstract"))
                     .collect(Collectors.toList());

@@ -65,8 +65,6 @@ public class VDAnnotator implements Annotator {
                                 }
                             } else {
 
-                                String error = null;
-
                                 // Type check
                                 switch (type) {
 
@@ -78,9 +76,6 @@ public class VDAnnotator implements Annotator {
                                             holder.createWarningAnnotation(attr.getLastChild(), "Resolves to boolean 'true'");
                                         }
                                         break;
-                                }
-                                if (error != null) {
-                                    holder.createErrorAnnotation(attr.getLastChild(), error);
                                 }
                             }
                         }

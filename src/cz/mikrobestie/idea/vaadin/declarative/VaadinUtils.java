@@ -66,6 +66,12 @@ public class VaadinUtils {
         attrs.put("margin-left", TYPE_VOID);
         componentAttrMap.put("com.vaadin.ui.AbstractOrderedLayout", attrs);
 
+        // Window
+        attrs = new HashMap<>();
+        attrs.put("center", TYPE_VOID);
+        attrs.put("position", TYPE_STRING);
+        attrs.put("close-shortcut", TYPE_STRING);
+        componentAttrMap.put("com.vaadin.ui.Window", attrs);
 
         // Parent attrs
         attrs = new HashMap<>();

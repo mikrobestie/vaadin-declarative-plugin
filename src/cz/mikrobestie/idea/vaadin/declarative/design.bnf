@@ -14,7 +14,7 @@
   tokenTypeClass="cz.mikrobestie.idea.vaadin.declarative.psi.VDTokenType"
 }
 
-Document ::= DOCTYPE_DECL? (HtmlTag | Component)
+Document ::= DOCTYPE_DECL? (Component | HtmlTag)
 HtmlTag ::= COMMENT* EL_LEFT TAG_HTML Attr* EL_RIGHT HeadTag? BodyTag EL_CLOSE_LEFT TAG_HTML EL_RIGHT {pin = 2}
 HeadTag ::= COMMENT* EL_LEFT TAG_HEAD EL_RIGHT (MetaTag | COMMENT)* EL_CLOSE_LEFT TAG_HEAD EL_RIGHT {pin = 2}
 MetaTag ::= COMMENT* EL_LEFT TAG_META Attr+ EL_CLOSE_RIGHT {pin = 2}

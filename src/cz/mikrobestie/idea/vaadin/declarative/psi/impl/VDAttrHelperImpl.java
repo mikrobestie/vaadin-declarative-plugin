@@ -2,11 +2,11 @@ package cz.mikrobestie.idea.vaadin.declarative.psi.impl;
 
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import com.intellij.lang.ASTNode;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiMethod;
-import com.intellij.psi.PsiType;
+import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.psi.search.searches.MethodReferencesSearch;
 import com.intellij.util.IncorrectOperationException;
+import com.intellij.util.Query;
 import cz.mikrobestie.idea.vaadin.declarative.PluginUtils;
 import cz.mikrobestie.idea.vaadin.declarative.VaadinUtils;
 import cz.mikrobestie.idea.vaadin.declarative.psi.VDAttrHelper;
@@ -15,6 +15,8 @@ import cz.mikrobestie.idea.vaadin.declarative.psi.VDTypes;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Collection;
 
 /**
  * Created by Michal on 29.11.2015.
@@ -90,5 +92,17 @@ public abstract class VDAttrHelperImpl extends ASTWrapperPsiElement implements V
             }
         }
         return null;
+    }
+
+    @NotNull
+    @Override
+    public PsiReference[] getReferences() {
+        PsiMethod setter = getSetter();
+        if (setter != null) {
+            Query<PsiReference> search = MethodReferencesSearch.search(setter);
+            Collection<PsiReference> references = search.findAll();
+            return references.toArray(new PsiReference[references.size()]);
+        }
+        return new PsiReference[0];
     }
 }

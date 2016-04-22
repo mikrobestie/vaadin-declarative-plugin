@@ -24,7 +24,7 @@ import cz.mikrobestie.idea.vaadin.declarative.psi.VDTypes;
 %unicode
 
 WHITE_SPACE = [\ \t\f\r\n]
-COMPONENT_NAME = [a-z]+(-[a-z]+)*
+COMPONENT_NAME = [a-z0-9]+(-[a-z][a-z0-9]*)*
 ATTR_NAME = [_:a-z]?[a-z-]*
 ATTR_VALUE = \"[^\"]*\"?|'[^']*'?
 EL_LEFT = "<"
